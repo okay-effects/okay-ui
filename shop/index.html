@@ -4,10 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Shop — okay-ui</title>
+  <link rel="stylesheet" href="okay-ui.css">
+  <style>:root:root { --demo-accent: #3b5bdb; --demo-deep: #1e2a5a; }</style>
 </head>
 <body>
+  <header><div class="bar">
+    <span class="brand">Shop</span><span class="tag">customers and orders, on three effect kernels</span>
+  </div></header>
   <div id="app"></div>
-  <!-- the shop, linked by Scala.js: `sbt -Dplatforms=js examplesJS/web` puts main.js here -->
+  <footer><div class="bar">
+    Built with <a href="https://github.com/okay-effects/okay-ui" target="_blank" rel="noopener noreferrer">okay-ui</a> —
+    business screens as data on algebraic effects, in Scala 3
+  </div></footer>
+  <!-- the shop, linked by Scala.js: `sbt -Dplatforms=jvm,js examplesJS/web` puts main.js and okay-ui.css here -->
   <script src="main.js"></script>
 </body>
 </html>
