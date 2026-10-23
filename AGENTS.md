@@ -16,8 +16,11 @@ spec first.
 - Toolkits drive `Step`; `Play` (core) is the reference. `faces` maps a screen to okay-faces' `View` + `Action`s.
 - In an anonymous class implementing a handler, never name a pattern variable like the method it implements
   (`ret`, `op`, `answer`): the method calls itself, a tail call that loops forever (cost an hour, 2026-10-23).
-- okay-scala is not released: `cd ../okay-scala && sbt -Dplatforms=jvm,js "++3.3.8" publishLocal` (NOT `+publishLocal`:
-  its 3.3 and 3.9 builds share one artifact name, the last wins and 3.3 cannot read it). Publish from a clean
-  worktree of its master: its working tree may hold another session's edits.
+- okay-scala 0.1.0 is released (its GitHub Pages maven). The faces run on okay-scala's machine through okay-simple's
+  adapter `okay-effects-cek` (`import okay.effects.cek.OnCek.self`), not released yet: publish it from a clean
+  worktree of okay-simple's master — `git worktree add --detach /tmp/os-pub master`, then there
+  `sbt -Dplatforms=jvm,js effects/publishLocal effectsJS/publishLocal cek/publishLocal cekJS/publishLocal`.
+  `okay-effects-machine` is still on the classpath, pulled in by okay-simple's `shape` and `json`; nothing here runs
+  on it.
 - `sbt test`; `sbt -Dplatforms=jvm,js coreJS/test facesJS/compile`. Lines at most 120 wide. Commits: plain messages,
   no attribution trailers.

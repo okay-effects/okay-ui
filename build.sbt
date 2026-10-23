@@ -2,14 +2,17 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val scala3 = "3.3.8"
-val okayScala = "0.1.0-SNAPSHOT"
+val okayScala = "0.1.0"
 val okayEffects = "0.1.1"
+/** okay-simple's interface on okay-scala's machine: not released yet — `publishLocal` from okay-simple's master */
+val okayEffectsCek = "0.1.2-SNAPSHOT"
 
 ThisBuild / organization := "io.github.okay-effects"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / scalaVersion := scala3
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Wunused:imports,privates,locals")
 ThisBuild / resolvers += "okay-effects" at "https://okay-effects.github.io/okay-simple/maven"
+ThisBuild / resolvers += "okay-scala" at "https://okay-effects.github.io/okay-scala/maven"
 ThisBuild / licenses := List("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt"))
 
 val platformsAsked: Set[String] =
@@ -37,13 +40,14 @@ lazy val simpleKernel = crossProject(platforms: _*).crossType(CrossType.Pure).in
 val okayFaces = "0.1.0"
 ThisBuild / resolvers += "okay-faces" at "https://okay-effects.github.io/okay-faces/maven"
 
-/** THE SCREENS ON OKAY-FACES: every face of it — terminal, HTML, Swing, Laminar, MCP — runs a business program */
+/** THE SCREENS ON OKAY-FACES: every face of it — terminal, HTML, Swing, Laminar, MCP — runs a business program; on
+ * okay-scala's machine, through okay-simple's adapter: `import okay.effects.cek.OnCek.self` */
 lazy val faces = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("faces"))
   .dependsOn(core)
   .settings(name := "okay-ui-faces",
     libraryDependencies ++= Seq("io.github.okay-effects" %%% "okay-faces" % okayFaces,
-      "io.github.okay-effects" %%% "okay-faces-test" % okayFaces % Test,
-      "io.github.okay-effects" %%% "okay-effects-machine" % okayEffects % Test, munit.value))
+      "io.github.okay-effects" %%% "okay-effects-cek" % okayEffectsCek,
+      "io.github.okay-effects" %%% "okay-faces-test" % okayFaces % Test, munit.value))
 
 /** THE EXAMPLE, written once on okay-scala; its copies on okay-simple's machine and Free made by changing the import
  * line (and the package) alone — the proof that the kernel is the import */

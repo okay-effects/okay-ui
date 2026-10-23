@@ -3,12 +3,12 @@ package okay.business.examples
 import okay.business.faces.OnFaces
 import okay.business.model.{Step, Day}
 import okay.effects.json.Json.{Bool, Num, Str, obj}
-import okay.effects.machine.Machine.*
+import okay.effects.cek.OnCek.*
 import okay.faces.Chosen
 import okay.faces.test.Plays
 
 /** THE SHOP ON OKAY-FACES: the business program's steps, of each kernel, as a program of `Face` — played by okay-faces'
- * own test face, and at its terminal */
+ * own test face, and at its terminal — on okay-scala's machine (`OnCek`) */
 class FacesSuite extends munit.FunSuite:
   val plays = Plays()
   import plays.{Played, Script}

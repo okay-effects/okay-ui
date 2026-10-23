@@ -28,7 +28,10 @@ chosen by ONE import.
    (on a kernel with multi-shot continuations: all three above).
 5. **Toolkits**: anything that drives `Step`s. In this repository: `Play` (a test script, in core) and the
    okay-faces handler (module `faces`), which turns steps into a program of okay-faces' `Face` — so every okay-faces
-   face (terminal, HTML, Swing, Laminar, MCP) runs a business application unchanged.
+   face (terminal, HTML, Swing, Laminar, MCP) runs a business application unchanged. That program of `Face` runs on
+   okay-scala's machine too: okay-faces is written over okay-simple's interface, and okay-simple's adapter
+   `okay-effects-cek` (`OnCek`) is that interface on okay-scala's CEK machine — `import okay.effects.cek.OnCek.self`.
+   okay-simple's own machine is not needed, only its interface and the libraries okay-faces is made of.
 
 ## The model
 
@@ -68,10 +71,11 @@ what a field accepts.
 | `core` | `okay-ui-core` | nothing |
 | `scala3` | `okay-ui-scala3` | core, okay-scala |
 | `simple` | `okay-ui-simple` | core, okay-simple (machine, free) |
-| `faces` | `okay-ui-faces` | core, okay-faces |
+| `faces` | `okay-ui-faces` | core, okay-faces, okay-simple's `okay-effects-cek` (okay-scala's machine) |
 | `examples` | — | all |
 
-The default application depends on `okay-ui-scala3` and `okay-ui-faces`.
+The default application depends on `okay-ui-scala3` and `okay-ui-faces`: the business program and its screens both
+on okay-scala's machine.
 
 ## Tests
 
