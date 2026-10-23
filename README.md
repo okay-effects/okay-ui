@@ -73,19 +73,20 @@ Play(steps(addCustomer[Ui]), Act.press("Save", "Name" -> "Ann", "Email" -> "ann@
 | `simple` | `okay-ui-simple` | okay-simple (machine, Free) |
 | `faces` | `okay-ui-faces` | okay-faces |
 | `ui` | `okay-ui` | the default: `scala3` and `faces` |
-| `examples` | — | the shop, on every kernel and on okay-faces |
+| `examples` | — | the shop, on every kernel and on okay-faces: at a terminal (JVM), in a page (Scala.js) |
 
 JVM and Scala.js (`sbt -Dplatforms=jvm,js`).
 
 ## Build
 
-okay-scala is not released yet: publish it locally first, for Scala 3.3 only (its artifact is one name for both of its
-Scala versions):
+okay-scala 0.1.0 is released. okay-simple's adapter onto okay-scala's machine, `okay-effects-cek`, is not yet: publish
+it locally from okay-simple (AGENTS.md says how).
 
 ```text
-cd ../okay-scala && sbt -Dplatforms=jvm,js "++3.3.8" publishLocal
-cd ../okay-ui && sbt test            # the model, the shop on three kernels, on okay-faces and its terminal
-sbt examples/run                     # the shop at a terminal
+sbt test                                   # the model, the shop on three kernels, on okay-faces and its terminal
+sbt examplesJVM/run                        # the shop at a terminal
+sbt -Dplatforms=jvm,js test                # the same on Scala.js too, the shop's page clicked through under jsdom
+sbt -Dplatforms=jvm,js examplesJS/web      # the shop in a browser: open examples/.js/target/web/index.html
 ```
 
 License: Apache 2.0.

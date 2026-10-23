@@ -22,5 +22,9 @@ spec first.
   `sbt -Dplatforms=jvm,js effects/publishLocal effectsJS/publishLocal cek/publishLocal cekJS/publishLocal`.
   `okay-effects-machine` is still on the classpath, pulled in by okay-simple's `shape` and `json`; nothing here runs
   on it.
-- `sbt test`; `sbt -Dplatforms=jvm,js coreJS/test facesJS/compile`. Lines at most 120 wide. Commits: plain messages,
+- Scala.js: `sbt -Dplatforms=jvm,js test` — every module, the shop's scripted tests shared, the page
+  (`ShopPageSuite`) under jsdom from `NODE_PATH` (default /opt/homebrew/lib/node_modules). `examplesJS/web` links the
+  shop's page into `examples/.js/target/web`. okay-faces' Laminar face draws a form again EMPTY after a problem: a
+  person retypes it (okay-faces' behaviour, 0.1.0).
+- `sbt test`. Lines at most 120 wide. Commits: plain messages,
   no attribution trailers.

@@ -39,6 +39,7 @@ lazy val simpleKernel = crossProject(platforms: _*).crossType(CrossType.Pure).in
 
 val okayFaces = "0.1.0"
 ThisBuild / resolvers += "okay-faces" at "https://okay-effects.github.io/okay-faces/maven"
+ThisBuild / resolvers += "okay-http" at "https://okay-effects.github.io/okay-http/maven"
 
 /** THE SCREENS ON OKAY-FACES: every face of it — terminal, HTML, Swing, Laminar, MCP — runs a business program; on
  * okay-scala's machine, through okay-simple's adapter: `import okay.effects.cek.OnCek.self` */
@@ -50,13 +51,18 @@ lazy val faces = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("
       "io.github.okay-effects" %%% "okay-faces-test" % okayFaces % Test, munit.value))
 
 /** THE EXAMPLE, written once on okay-scala; its copies on okay-simple's machine and Free made by changing the import
- * line (and the package) alone — the proof that the kernel is the import */
-lazy val examples = (project in file("examples")).dependsOn(scala3Kernel.jvm, simpleKernel.jvm, faces.jvm)
-  .settings(publish / skip := true,
-    libraryDependencies ++= Seq(munit.value, "io.github.okay-effects" %%% "okay-faces-term" % okayFaces,
-      "io.github.okay-effects" %%% "okay-faces-test" % okayFaces % Test),
+ * line (and the package) alone — the proof that the kernel is the import. The shop and its scripted tests shared; at a
+ * terminal on the JVM (`scala-jvm`), in a page with Scala.js (`scala-js`: `sbt -Dplatforms=js examplesJS/web`) */
+val web = taskKey[File]("the shop's page: index.html and its script, linked, in target/web")
+lazy val examples = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("examples"))
+  .dependsOn(scala3Kernel, simpleKernel, faces)
+  .settings(name := "okay-ui-examples", publish / skip := true,
+    libraryDependencies ++= Seq(munit.value, "io.github.okay-effects" %%% "okay-faces-test" % okayFaces % Test),
+    Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala",
+    Test / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "test" / "scala",
     Compile / sourceGenerators += Def.task {
-      val src = (Compile / scalaSource).value / "okay" / "business" / "examples" / "Shop.scala"
+      val src = baseDirectory.value.getParentFile / "src" / "main" / "scala" / "okay" / "business" / "examples" /
+        "Shop.scala"
       val text = IO.read(src)
       Seq("simple", "free").map { kernel =>
         val out = (Compile / sourceManaged).value / "okay" / "business" / "examples" / kernel / "Shop.scala"
@@ -67,12 +73,35 @@ lazy val examples = (project in file("examples")).dependsOn(scala3Kernel.jvm, si
         out
       }
     }.taskValue)
+  .jvmSettings(
+    Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-jvm",
+    Test / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "test" / "scala-jvm",
+    libraryDependencies += "io.github.okay-effects" %%% "okay-faces-term" % okayFaces)
+  .jsSettings(
+    Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-js",
+    Test / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "test" / "scala-js",
+    libraryDependencies += "io.github.okay-effects" %%% "okay-faces-laminar" % okayFaces,
+    scalaJSUseMainModuleInitializer := true,
+    Compile / mainClass := Some("okay.business.examples.InTheBrowser"),
+    // the page tested under jsdom, clicked through as a person would
+    Test / jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(
+      org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv.Config()
+        .withEnv(Map("NODE_PATH" -> sys.env.getOrElse("NODE_PATH", "/opt/homebrew/lib/node_modules")))),
+    web := {
+      val linked = (Compile / fastLinkJS).value.data.publicModules.head.jsFileName
+      val from = (Compile / fastLinkJS / scalaJSLinkerOutputDirectory).value / linked
+      val out = target.value / "web"
+      IO.copyFile(baseDirectory.value.getParentFile / "web" / "index.html", out / "index.html")
+      IO.copyFile(from, out / "main.js")
+      streams.value.log.info(s"the shop's page: ${out / "index.html"}")
+      out
+    })
 
 /** THE DEFAULT: okay-scala's machine and okay-faces' faces — `"io.github.okay-effects" %% "okay-ui" % ...` */
 lazy val ui = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("ui"))
   .dependsOn(scala3Kernel, faces)
   .settings(name := "okay-ui")
 
-lazy val root = (project in file(".")).aggregate((Seq(core, scala3Kernel, simpleKernel, faces, ui)
-  .flatMap(_.componentProjects).map(p => p: ProjectReference) :+ (examples: ProjectReference)): _*)
+lazy val root = (project in file(".")).aggregate(Seq(core, scala3Kernel, simpleKernel, faces, ui, examples)
+  .flatMap(_.componentProjects).map(p => p: ProjectReference): _*)
   .settings(publish / skip := true)
