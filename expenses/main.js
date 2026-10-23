@@ -7889,24 +7889,9 @@ $p.Jj = (function(es) {
   return new $c_Lokay_business_model$Table(this$10.fA, this$10.iK, this$10.mY, "no expenses");
 });
 $p.vF = (function(evidence$1, evidence$2, evidence$3) {
-  return new $c_Lokay_scala3_Prog$FlatMap($f_Lokay_business_Business__menu__T__sci_Seq__O__O($m_Lokay_business_scala3$(), "Expenses", $m_sr_ScalaRunTime$().D(new ($d_T2.r().C)([$ct_T2__O__O__(new $c_T2(), "Add an expense", 1), $ct_T2__O__O__(new $c_T2(), "This month", 2), $ct_T2__O__O__(new $c_T2(), "All expenses", 3), $ct_T2__O__O__(new $c_T2(), "Quit", 0)])), evidence$1), new $c_sjsr_AnonFunction1_$$Lambda$412915ce24663401f4bc24349a746e1dbd693dc1(((x$1) => {
-    switch ((x$1 | 0)) {
-      case 0: {
-        return new $c_Lokay_scala3_Prog$Value((void 0));
-        break;
-      }
-      case 1: {
-        return $f_Lokay_business_Kernel__andThen__O__F0__O($m_Lokay_business_scala3$(), $m_Lokay_business_reference_Expenses$().Kp(evidence$1, evidence$2, evidence$3), new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => new $c_Lokay_scala3_Prog$Defer(new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => $m_Lokay_business_reference_Expenses$().vF(evidence$1, evidence$2, evidence$3)))))));
-        break;
-      }
-      case 2: {
-        return $f_Lokay_business_Kernel__andThen__O__F0__O($m_Lokay_business_scala3$(), $m_Lokay_business_reference_Expenses$().Qs(evidence$1, evidence$2, evidence$3), new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => new $c_Lokay_scala3_Prog$Defer(new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => $m_Lokay_business_reference_Expenses$().vF(evidence$1, evidence$2, evidence$3)))))));
-        break;
-      }
-      default: {
-        return $f_Lokay_business_Kernel__andThen__O__F0__O($m_Lokay_business_scala3$(), $m_Lokay_business_reference_Expenses$().GG(evidence$1, evidence$2), new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => new $c_Lokay_scala3_Prog$Defer(new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => $m_Lokay_business_reference_Expenses$().vF(evidence$1, evidence$2, evidence$3)))))));
-      }
-    }
+  return new $c_Lokay_scala3_Prog$FlatMap($f_Lokay_business_Business__menu__T__sci_Seq__O__O($m_Lokay_business_scala3$(), "Expenses", $m_sr_ScalaRunTime$().D(new ($d_T2.r().C)([$ct_T2__O__O__(new $c_T2(), "Add an expense", 1), $ct_T2__O__O__(new $c_T2(), "This month", 2), $ct_T2__O__O__(new $c_T2(), "All expenses", 3)])), evidence$1), new $c_sjsr_AnonFunction1_$$Lambda$412915ce24663401f4bc24349a746e1dbd693dc1(((x$1) => {
+    var x$1$1 = (x$1 | 0);
+    return ((x$1$1 === 1) ? $f_Lokay_business_Kernel__andThen__O__F0__O($m_Lokay_business_scala3$(), $m_Lokay_business_reference_Expenses$().Kp(evidence$1, evidence$2, evidence$3), new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => new $c_Lokay_scala3_Prog$Defer(new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => $m_Lokay_business_reference_Expenses$().vF(evidence$1, evidence$2, evidence$3))))))) : ((x$1$1 === 2) ? $f_Lokay_business_Kernel__andThen__O__F0__O($m_Lokay_business_scala3$(), $m_Lokay_business_reference_Expenses$().Qs(evidence$1, evidence$2, evidence$3), new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => new $c_Lokay_scala3_Prog$Defer(new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => $m_Lokay_business_reference_Expenses$().vF(evidence$1, evidence$2, evidence$3))))))) : $f_Lokay_business_Kernel__andThen__O__F0__O($m_Lokay_business_scala3$(), $m_Lokay_business_reference_Expenses$().GG(evidence$1, evidence$2), new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => new $c_Lokay_scala3_Prog$Defer(new $c_sjsr_AnonFunction0_$$Lambda$2bf0f8dc580d6edeb2d6a336c52a1bab3049702d((() => $m_Lokay_business_reference_Expenses$().vF(evidence$1, evidence$2, evidence$3)))))))));
   })));
 });
 $p.Kp = (function(evidence$1, evidence$2, evidence$3) {
