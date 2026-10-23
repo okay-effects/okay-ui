@@ -4,6 +4,9 @@ A business application written in the words its users know: a screen, a form, a 
 else. Where a screen is drawn, what it looks like, how a click comes back is a HANDLER's: the same program runs at a
 terminal, in a browser, in a window, as an agent's tools, under a test script. Change the handler, not the program.
 
+**Try it in the browser:** [Expenses](https://okay-effects.github.io/okay-ui/expenses/), the reference application
+below, and [the shop](https://okay-effects.github.io/okay-ui/shop/) — Scala 3 on Scala.js, nothing on a server.
+
 Scala 3 only. Package `okay.business`. Under it, algebraic effects, on any kernel of the okay family, chosen by one
 import.
 
@@ -69,6 +72,8 @@ Play(steps(addCustomer[Ui]), Act.press("Save", "Name" -> "Ann", "Email" -> "ann@
 [Expenses](reference/src/main/scala/okay/business/reference), a small personal expense tracker, shows the
 architecture end to end. The data model is effects: what the program asks, and what it is answered. Every
 implementation is a handler, and each environment runs the whole application in one line that names its handlers.
+It runs [live in the browser](https://okay-effects.github.io/okay-ui/expenses/); `sh tools/publish-demo.sh` builds the
+demo's pages.
 
 | effect | operations | defined by |
 |---|---|---|
