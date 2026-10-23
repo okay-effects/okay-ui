@@ -16,18 +16,14 @@ spec first.
 - Toolkits drive `Step`; `Play` (core) is the reference. `faces` maps a screen to okay-faces' `View` + `Action`s.
 - In an anonymous class implementing a handler, never name a pattern variable like the method it implements
   (`ret`, `op`, `answer`): the method calls itself, a tail call that loops forever (cost an hour, 2026-10-23).
-- okay-scala 0.1.0 is released (its GitHub Pages maven). The faces run on okay-scala's machine through okay-simple's
-  adapter `okay-effects-cek` (`import okay.effects.cek.OnCek.self`), not released yet: publish it from a clean
-  worktree of okay-simple's master — `git worktree add --detach /tmp/os-pub master`, then there
-  `sbt -Dplatforms=jvm,js effects/publishLocal effectsJS/publishLocal cek/publishLocal cekJS/publishLocal`.
-  `okay-effects-machine` is still on the classpath, pulled in by okay-simple's `shape` and `json`; nothing here runs
-  on it.
+- Everything it depends on is released (okay-scala 0.1.0, okay-simple 0.1.1 with `okay-effects-cek`, okay-faces
+  0.1.0), each from its GitHub Pages maven: the build needs no local copy. The faces run on okay-scala's machine
+  through okay-simple's adapter `okay-effects-cek` (`import okay.effects.cek.OnCek.self`). Releasing: RELEASING.md.
 - Scala.js: `sbt -Dplatforms=jvm,js test` — every module, the shop's scripted tests shared, the page
   (`ShopPageSuite`) under jsdom from `NODE_PATH` (default /opt/homebrew/lib/node_modules). `examplesJS/web` links the
   shop's page into `examples/.js/target/web`. okay-faces 0.1.0 as republished on 2026-10-23: a rejected form keeps
   what was typed (the first 0.1.0 drew it again empty) — a stale Coursier cache of okay-faces gives the old jars.
-- okay-faces 0.1.1-SNAPSHOT (`View.Link`, for `Part.Link`) is not released: `sbt -Dplatforms=jvm,js +publishLocal`
-  in okay-faces' master first. `ui` with Scala.js has `Laminar.run(root)`: `Ui` into okay-scala's `Lifted[Future]`,
+- `ui` with Scala.js has `Laminar.run(root)`: `Ui` into okay-scala's `Lifted[Future]`,
   for programs whose world answers later (Coinpath's fetches); its test under jsdom.
 - A page's look is okay-ui's, built in (spec, "How a page looks"): `Skin` in `faces` (okay-faces' `Look` plus a
   stylesheet over its classes), `Skin.default` = `calm()`, `Skin.plain`; in a page `Page.mount` / `Laminar.run(root)`

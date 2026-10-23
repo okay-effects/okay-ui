@@ -4,17 +4,25 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 val scala3 = "3.3.8"
 val okayScala = "0.1.0"
 val okayEffects = "0.1.1"
-/** okay-simple's interface on okay-scala's machine: not released yet — `publishLocal` from okay-simple's master */
-val okayEffectsCek = "0.1.2-SNAPSHOT"
+/** okay-simple's interface on okay-scala's machine, released with okay-simple */
+val okayEffectsCek = "0.1.1"
 
 ThisBuild / organization := "io.github.okay-effects"
 ThisBuild / homepage := Some(url("https://github.com/okay-effects/okay-ui"))
-ThisBuild / version := "0.1.0-SNAPSHOT"
+ThisBuild / version := "0.1.0"
 ThisBuild / scalaVersion := scala3
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Wunused:imports,privates,locals")
 ThisBuild / resolvers += "okay-effects" at "https://okay-effects.github.io/okay-simple/maven"
 ThisBuild / resolvers += "okay-scala" at "https://okay-effects.github.io/okay-scala/maven"
 ThisBuild / licenses := List("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt"))
+ThisBuild / versionScheme := Some("early-semver")
+/** RELEASES, ON GITHUB PAGES: `sbt -Dplatforms=jvm,js publish` writes every published module, for both platforms, as
+ * a Maven repository into `target/pages-maven/`; that directory goes to the `gh-pages` branch under `maven/`, served at
+ * https://okay-effects.github.io/okay-ui/maven (RELEASING.md) */
+val pagesRepository = settingKey[File]("the Maven repository a release is written to, for GitHub Pages")
+ThisBuild / pagesRepository := (ThisBuild / baseDirectory).value / "target" / "pages-maven"
+ThisBuild / publishTo := Some(MavenCache("pages", (ThisBuild / pagesRepository).value))
+ThisBuild / Compile / packageDoc / publishArtifact := false
 
 val platformsAsked: Set[String] =
   sys.props.get("platforms").getOrElse("jvm").split(',').map(_.trim.toLowerCase).toSet + "jvm"
@@ -39,8 +47,8 @@ lazy val simpleKernel = crossProject(platforms: _*).crossType(CrossType.Pure).in
     libraryDependencies ++= Seq("io.github.okay-effects" %%% "okay-effects-machine" % okayEffects,
       "io.github.okay-effects" %%% "okay-effects-free" % okayEffects))
 
-/** okay-faces with `View.Link`: not released yet — `publishLocal` from okay-faces' master */
-val okayFaces = "0.1.1-SNAPSHOT"
+/** okay-faces, released (0.1.0 as republished 2026-10-23: `View.Link`) */
+val okayFaces = "0.1.0"
 ThisBuild / resolvers += "okay-faces" at "https://okay-effects.github.io/okay-faces/maven"
 ThisBuild / resolvers += "okay-http" at "https://okay-effects.github.io/okay-http/maven"
 
