@@ -1,0 +1,74 @@
+// okay-ui: business applications' screens as data, for Scala 3 alone — package okay.business
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+
+val scala3 = "3.3.8"
+val okayScala = "0.1.0-SNAPSHOT"
+val okayEffects = "0.1.1"
+
+ThisBuild / organization := "io.github.okay-effects"
+ThisBuild / version := "0.1.0-SNAPSHOT"
+ThisBuild / scalaVersion := scala3
+ThisBuild / scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Wunused:imports,privates,locals")
+ThisBuild / resolvers += "okay-effects" at "https://okay-effects.github.io/okay-simple/maven"
+ThisBuild / licenses := List("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt"))
+
+val platformsAsked: Set[String] =
+  sys.props.get("platforms").getOrElse("jvm").split(',').map(_.trim.toLowerCase).toSet + "jvm"
+val platforms: Seq[sbtcrossproject.Platform] =
+  Seq[sbtcrossproject.Platform](JVMPlatform) ++ (if (platformsAsked("js")) Seq(JSPlatform) else Nil)
+val munit = Def.setting("org.scalameta" %%% "munit" % "1.2.3" % Test)
+
+/** THE MODEL, THE EFFECT, THE KERNEL'S WORDS: no dependency */
+lazy val core = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("core"))
+  .settings(name := "okay-ui-core", libraryDependencies += munit.value)
+
+/** on okay-scala's machine: `import okay.business.scala3.*` */
+lazy val scala3Kernel = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("scala3"))
+  .dependsOn(core)
+  .settings(name := "okay-ui-scala3", libraryDependencies += "io.github.okay-effects" %%% "okay-scala" % okayScala)
+
+/** on okay-simple's machine: `import okay.business.simple.*` */
+lazy val simpleKernel = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("simple"))
+  .dependsOn(core)
+  .settings(name := "okay-ui-simple",
+    libraryDependencies ++= Seq("io.github.okay-effects" %%% "okay-effects-machine" % okayEffects,
+      "io.github.okay-effects" %%% "okay-effects-free" % okayEffects))
+
+val okayFaces = "0.1.0"
+ThisBuild / resolvers += "okay-faces" at "https://okay-effects.github.io/okay-faces/maven"
+
+/** THE SCREENS ON OKAY-FACES: every face of it — terminal, HTML, Swing, Laminar, MCP — runs a business program */
+lazy val faces = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("faces"))
+  .dependsOn(core)
+  .settings(name := "okay-ui-faces",
+    libraryDependencies ++= Seq("io.github.okay-effects" %%% "okay-faces" % okayFaces,
+      "io.github.okay-effects" %%% "okay-faces-test" % okayFaces % Test,
+      "io.github.okay-effects" %%% "okay-effects-machine" % okayEffects % Test, munit.value))
+
+/** THE EXAMPLE, written once on okay-scala; its copies on okay-simple's machine and Free made by changing the import
+ * line (and the package) alone — the proof that the kernel is the import */
+lazy val examples = (project in file("examples")).dependsOn(scala3Kernel.jvm, simpleKernel.jvm, faces.jvm)
+  .settings(publish / skip := true,
+    libraryDependencies ++= Seq(munit.value, "io.github.okay-effects" %%% "okay-faces-term" % okayFaces,
+      "io.github.okay-effects" %%% "okay-faces-test" % okayFaces % Test),
+    Compile / sourceGenerators += Def.task {
+      val src = (Compile / scalaSource).value / "okay" / "business" / "examples" / "Shop.scala"
+      val text = IO.read(src)
+      Seq("simple", "free").map { kernel =>
+        val out = (Compile / sourceManaged).value / "okay" / "business" / "examples" / kernel / "Shop.scala"
+        val copy = text.replace("package okay.business.examples.scala3", s"package okay.business.examples.$kernel")
+          .replace("import okay.business.scala3.*", s"import okay.business.$kernel.*")
+        require(copy.linesIterator.size == text.linesIterator.size)
+        IO.write(out, copy)
+        out
+      }
+    }.taskValue)
+
+/** THE DEFAULT: okay-scala's machine and okay-faces' faces — `"io.github.okay-effects" %% "okay-ui" % ...` */
+lazy val ui = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("ui"))
+  .dependsOn(scala3Kernel, faces)
+  .settings(name := "okay-ui")
+
+lazy val root = (project in file(".")).aggregate((Seq(core, scala3Kernel, simpleKernel, faces, ui)
+  .flatMap(_.componentProjects).map(p => p: ProjectReference) :+ (examples: ProjectReference)): _*)
+  .settings(publish / skip := true)

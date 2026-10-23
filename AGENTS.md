@@ -1,0 +1,23 @@
+# AGENTS.md — okay-ui
+
+Read before anything else, then `specs/business.md`: the code follows the spec; a change of design is a change of the
+spec first.
+
+- Scala 3 only (3.3 LTS), package `okay.business` — not `okay.ui`, which the platform okay has (a split package breaks
+  JPMS if both are ever on one module path).
+- THE KERNEL IS THE IMPORT. Library code is written once over the abstract `Kernel` / `Business`; an adapter
+  (`scala3`, `simple`, `free`) is an object whose types are its kernel's own. Never add a kernel-specific word to an
+  application's vocabulary: if one adapter needs it, all get it in the trait.
+- The example `examples/.../Shop.scala` is the proof: written on `okay.business.scala3`, copied by the build for
+  `simple` and `free` by changing the import and package lines only (`build.sbt` checks the line count). Keep it so:
+  anything the shop needs must be in the model or the trait.
+- `model` is values: no toolkit, no `java.time` (Scala.js). What a field accepts is the model's (`Field.read`), once —
+  a toolkit never decides it; okay-faces' `Shape` for a field is refined by `Field.read`.
+- Toolkits drive `Step`; `Play` (core) is the reference. `faces` maps a screen to okay-faces' `View` + `Action`s.
+- In an anonymous class implementing a handler, never name a pattern variable like the method it implements
+  (`ret`, `op`, `answer`): the method calls itself, a tail call that loops forever (cost an hour, 2026-10-23).
+- okay-scala is not released: `cd ../okay-scala && sbt -Dplatforms=jvm,js "++3.3.8" publishLocal` (NOT `+publishLocal`:
+  its 3.3 and 3.9 builds share one artifact name, the last wins and 3.3 cannot read it). Publish from a clean
+  worktree of its master: its working tree may hold another session's edits.
+- `sbt test`; `sbt -Dplatforms=jvm,js coreJS/test facesJS/compile`. Lines at most 120 wide. Commits: plain messages,
+  no attribution trailers.
