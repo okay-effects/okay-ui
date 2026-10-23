@@ -37,8 +37,9 @@ class ShopPageSuite extends munit.FunSuite:
     typeInto(root, "f-name", "Ann"); typeInto(root, "f-email", "ann"); submit(root, "save")
     assert(root.innerHTML.contains("an e-mail address"), root.innerHTML)
     assertEquals(memory.customers, Nil)
-    // okay-faces' Laminar face draws the form again empty after a problem: the person types it again
-    typeInto(root, "f-name", "Ann"); typeInto(root, "f-email", "ann@example.com"); submit(root, "save")
+    // what was typed stays: only the wrong field is typed again
+    assertEquals(q(root, "#f-name").asInstanceOf[dom.html.Input].value, "Ann")
+    typeInto(root, "f-email", "ann@example.com"); submit(root, "save")
     assertEquals(memory.customers.map(_.name), List("Ann"))
     assert(root.innerHTML.contains("Ann added"), root.innerHTML)
     press(root, "ok")
