@@ -57,12 +57,14 @@ lazy val faces = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("
  * line (and the package) alone — the proof that the kernel is the import. The shop and its scripted tests shared; at a
  * terminal on the JVM (`scala-jvm`), in a page with Scala.js (`scala-js`: `sbt -Dplatforms=js examplesJS/web`) */
 val web = taskKey[File]("a page: index.html and its script, linked, in target/web")
-/** the module's `web/index.html` and its linked script, `main.js`, side by side in target/web */
+/** the module's `web/index.html`, its linked script `main.js` and the demos' look `web/okay-ui.css`, side by side in
+ * target/web */
 def page(what: String) = Def.task {
   val linked = (Compile / fastLinkJS).value.data.publicModules.head.jsFileName
   val from = (Compile / fastLinkJS / scalaJSLinkerOutputDirectory).value / linked
   val out = target.value / "web"
   IO.copyFile(baseDirectory.value.getParentFile / "web" / "index.html", out / "index.html")
+  IO.copyFile((ThisBuild / baseDirectory).value / "web" / "okay-ui.css", out / "okay-ui.css")
   IO.copyFile(from, out / "main.js")
   streams.value.log.info(s"$what: ${out / "index.html"}")
   out

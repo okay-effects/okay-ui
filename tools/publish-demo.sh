@@ -11,6 +11,7 @@ cp reference/web/index.html "$out/expenses/index.html"
 cp "$(find reference/.js/target -path '*-opt/main.js' | head -1)" "$out/expenses/main.js"
 cp examples/web/index.html "$out/shop/index.html"
 cp "$(find examples/.js/target -path '*-opt/main.js' | head -1)" "$out/shop/main.js"
+cp web/okay-ui.css "$out/expenses/okay-ui.css"; cp web/okay-ui.css "$out/shop/okay-ui.css"
 cat > "$out/index.html" <<'HTML'
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
