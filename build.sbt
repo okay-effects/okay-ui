@@ -8,6 +8,7 @@ val okayEffects = "0.1.1"
 val okayEffectsCek = "0.1.2-SNAPSHOT"
 
 ThisBuild / organization := "io.github.okay-effects"
+ThisBuild / homepage := Some(url("https://github.com/okay-effects/okay-ui"))
 ThisBuild / version := "0.1.0-SNAPSHOT"
 ThisBuild / scalaVersion := scala3
 ThisBuild / scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked", "-Wunused:imports,privates,locals")
