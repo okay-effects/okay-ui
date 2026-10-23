@@ -57,14 +57,12 @@ lazy val faces = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("
  * line (and the package) alone — the proof that the kernel is the import. The shop and its scripted tests shared; at a
  * terminal on the JVM (`scala-jvm`), in a page with Scala.js (`scala-js`: `sbt -Dplatforms=js examplesJS/web`) */
 val web = taskKey[File]("a page: index.html and its script, linked, in target/web")
-/** the module's `web/index.html`, its linked script `main.js` and the demos' look `web/okay-ui.css`, side by side in
- * target/web */
+/** the module's `web/index.html` and its linked script, `main.js`, side by side in target/web */
 def page(what: String) = Def.task {
   val linked = (Compile / fastLinkJS).value.data.publicModules.head.jsFileName
   val from = (Compile / fastLinkJS / scalaJSLinkerOutputDirectory).value / linked
   val out = target.value / "web"
   IO.copyFile(baseDirectory.value.getParentFile / "web" / "index.html", out / "index.html")
-  IO.copyFile((ThisBuild / baseDirectory).value / "web" / "okay-ui.css", out / "okay-ui.css")
   IO.copyFile(from, out / "main.js")
   streams.value.log.info(s"$what: ${out / "index.html"}")
   out
@@ -74,7 +72,7 @@ val jsdom = Test / jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(
   org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv.Config()
     .withEnv(Map("NODE_PATH" -> sys.env.getOrElse("NODE_PATH", "/opt/homebrew/lib/node_modules"))))
 lazy val examples = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("examples"))
-  .dependsOn(scala3Kernel, simpleKernel, faces)
+  .dependsOn(scala3Kernel, simpleKernel, faces, ui)
   .settings(name := "okay-ui-examples", publish / skip := true,
     libraryDependencies ++= Seq(munit.value, "io.github.okay-effects" %%% "okay-faces-test" % okayFaces % Test),
     Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala",
@@ -109,7 +107,7 @@ lazy val examples = crossProject(platforms: _*).crossType(CrossType.Pure).in(fil
  * handler, each environment one line naming its handlers — at a terminal on the JVM, in a page with Scala.js
  * (`sbt -Dplatforms=jvm,js referenceJS/web`). See specs/reference.md */
 lazy val reference = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("reference"))
-  .dependsOn(scala3Kernel, faces)
+  .dependsOn(scala3Kernel, faces, ui)
   .settings(name := "okay-ui-reference", publish / skip := true,
     libraryDependencies ++= Seq(munit.value, "io.github.okay-effects" %%% "okay-effects-json" % okayEffects),
     Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala",

@@ -1,7 +1,7 @@
 package okay.business.laminar
 
 import com.raquo.laminar.api.L.*
-import okay.business.faces.OnFaces
+import okay.business.faces.{OnFaces, Skin}
 import okay.business.model.{Screen, Step, Ui}
 import okay.effects.cek.OnCek
 import okay.faces.laminar.LaminarFace
@@ -16,12 +16,15 @@ import scala.concurrent.{Future, Promise}
  *
  * `Show(screen)` draws the screen into `root` by okay-faces' Laminar face — its forms, its problems at their fields,
  * all of it the face's — and is answered by the button pressed, a `Future`. `Working(screen)` draws its screen and
- * goes on at once: progress, replaced by the next screen.
+ * goes on at once: progress, replaced by the next screen. The page wears `skin`, `Skin.default` unless another is
+ * said (`Page.install`).
  */
 object Laminar:
-  def run[R[_], Rest[_], A](root: dom.Element, settings: LaminarFace.Settings = LaminarFace.Settings())(p: A ! R)(
-    using Split[Ui, R, Rest], In[Lifted[Future], Rest]): A ! Rest =
+  def run[R[_], Rest[_], A](root: dom.Element, skin: Skin = Skin.default, browserHistory: Boolean = false)(
+    p: A ! R)(using Split[Ui, R, Rest], In[Lifted[Future], Rest]): A ! Rest =
     defer {
+      Page.install(skin)
+      val settings = Page.settings(skin, browserHistory)
       // the page this run draws into: made when the run starts, the screen shown its one child
       val face = new LaminarFace[OnCek.type]()(OnCek)
       val shown = Var[HtmlElement](div())

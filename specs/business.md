@@ -77,6 +77,25 @@ A toolkit shows `Waiting.screen`, lets the person fill its forms, select in its 
 `Answer`, and calls `Waiting.answer`: `Left(problems)` — show them and stay; `Right(step)` — go on. It never decides
 what a field accepts. A `Working` it shows and goes on from at once (`next()`); `Play` counts its title as seen.
 
+## How a page looks
+
+A page's look is okay-ui's, built in: a `Skin` (module `faces`, a value of no toolkit) is okay-faces' `Look` — the
+tokens and per-part rules every face reads, and its words — and a stylesheet over okay-faces' classes for what tokens
+cannot say: cards, radii, shadows, a grid of fields, a dark scheme. Nothing in it is content.
+
+- `Skin.default` = `Skin.calm()`: forms and tables as cards, the fields side by side on a wide screen, the actions
+  that go back (`back`, `cancel`, `ok`) outlined, light or dark by the system's choice.
+  `Skin.calm(accent, deep, scheme)` — the application's colours (the accent of buttons and links, the deep one of the
+  page's bar) and `Scheme.Auto` (the system's), `Light` or `Dark`.
+- `Skin.plain` — okay-faces' own look alone, no stylesheet of okay-ui's.
+- In a page (module `ui`, Scala.js) the skin is the default with nothing said: `Laminar.run(root)` and
+  `Page.mount(program)` put `Skin.default` into the document; another is one argument,
+  `Page.mount(program, Skin.calm(accent = "#0b7a5c"))`. `Page.install(skin)` alone dresses a page drawn otherwise;
+  installed again it replaces the one before.
+- The stylesheet also dresses a page's frame if the page has one: a `<header>` and a `<footer>` that are children of
+  `<body>`, each with a `.bar` inside (a `.brand` and a `.tag` in the header). The application's page writes them;
+  the skin only says how they look.
+
 ## Modules
 
 | module | artifact | depends on |
@@ -84,8 +103,8 @@ what a field accepts. A `Working` it shows and goes on from at once (`next()`); 
 | `core` | `okay-ui-core` | nothing |
 | `scala3` | `okay-ui-scala3` | core, okay-scala |
 | `simple` | `okay-ui-simple` | core, okay-simple (machine, free) |
-| `faces` | `okay-ui-faces` | core, okay-faces, okay-simple's `okay-effects-cek` (okay-scala's machine) |
-| `ui` | `okay-ui` | `scala3`, `faces`; with Scala.js okay-faces' Laminar face: `Laminar.run(root)`, `Ui` in a page |
+| `faces` | `okay-ui-faces` | core, okay-faces, okay-simple's `okay-effects-cek` (okay-scala's machine); `Skin` |
+| `ui` | `okay-ui` | `scala3`, `faces`; in a page (Scala.js, okay-faces' Laminar face): `Laminar.run`, `Page` |
 | `examples` | — | all |
 | `reference` | — | `scala3`, `faces`: the reference application, [reference.md](reference.md) |
 

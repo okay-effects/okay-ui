@@ -29,6 +29,9 @@ spec first.
 - okay-faces 0.1.1-SNAPSHOT (`View.Link`, for `Part.Link`) is not released: `sbt -Dplatforms=jvm,js +publishLocal`
   in okay-faces' master first. `ui` with Scala.js has `Laminar.run(root)`: `Ui` into okay-scala's `Lifted[Future]`,
   for programs whose world answers later (Coinpath's fetches); its test under jsdom.
+- A page's look is okay-ui's, built in (spec, "How a page looks"): `Skin` in `faces` (okay-faces' `Look` plus a
+  stylesheet over its classes), `Skin.default` = `calm()`, `Skin.plain`; in a page `Page.mount` / `Laminar.run(root)`
+  install it with nothing said. A page's `index.html` writes only its frame (header, `#app`, footer), never a style.
 - The reference application (`reference/`, specs/reference.md) shows the rule: data model as effects, every
   implementation a handler, one line per environment. Keep its mains one line each.
 - A module's Scala.js settings go in `.whenJs(...)` (project/WhenJs.scala), never `.jsSettings`: without
