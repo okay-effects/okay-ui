@@ -18,6 +18,9 @@ object OnFaces:
   def program[A](first: Step[A]): Program[A, Face] = first match
     case Step.Done(a) => okay.faces.pure[A, Face](a)
     case w: Step.Waiting[A, s] => waiting(w, Nil)
+    // shown, and on at once: a face tells it and runs the rest
+    case Step.Working(screen, next) =>
+      okay.faces.flatMap(okay.faces.show[Face](view(screen, Nil)))(_ => program(next()))
 
   private def waiting[A, S](w: Step.Waiting[A, S], problems: Problems): Program[A, Face] =
     okay.faces.flatMap(okay.faces.offer[Answer, Face](view(w.screen, problems), actions(w.screen))) { answer =>
@@ -39,6 +42,7 @@ object OnFaces:
     case Part.Notice(Level.Problem, s) => List(View.problem(s))
     case Part.Details(rows) => List(View.Fields(rows.map((l, c) => l -> View.text(c.text)).toVector))
     case Part.Section(title, parts) => List(View.Group(Some(title), parts.flatMap(part).toVector))
+    case Part.Link(label, url) => List(View.Link(label, url))
     case t: Table[r] =>
       if t.rows.isEmpty then List(View.text(t.empty))
       else List(View.Table(t.columns.map(_.title).toVector, t.rows.map(r => t.cells(r).map(c => View.text(c.text))

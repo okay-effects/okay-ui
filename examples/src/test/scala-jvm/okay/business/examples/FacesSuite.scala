@@ -55,6 +55,15 @@ class FacesSuite extends munit.FunSuite:
           assertEquals(at.actions.map(_.name), List("save", "cancel"))
         case other => fail(s"$other")
 
+  test("a working screen on okay-faces: told, and on at once — its link a View.Link"):
+    import okay.business.scala3.{!, Has, Ui, Part, Screen, Button, working, show, steps, andThen}
+    def p[R[_]: Has[Ui]]: Int ! R = working[R]("Counting")(Part.link("the source", "https://example.org/"))
+      .andThen(show(Screen[Int]("Counted")()(Button("OK")(2))))
+    plays.handle(OnFaces.program(steps(p[Ui])))(Script.of(Chosen.plain("ok"))) match
+      case Played.Finished(views, 2) =>
+        assert(views.head.toString.contains("Link(the source,https://example.org/)"), views.head.toString)
+      case other => fail(s"$other")
+
   test("at okay-faces' terminal, by lines typed: the shop on okay-scala"):
     val m = scala3.Shop.Memory()
     val term = okay.faces.term.Terminal()

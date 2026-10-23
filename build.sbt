@@ -39,7 +39,8 @@ lazy val simpleKernel = crossProject(platforms: _*).crossType(CrossType.Pure).in
     libraryDependencies ++= Seq("io.github.okay-effects" %%% "okay-effects-machine" % okayEffects,
       "io.github.okay-effects" %%% "okay-effects-free" % okayEffects))
 
-val okayFaces = "0.1.0"
+/** okay-faces with `View.Link`: not released yet — `publishLocal` from okay-faces' master */
+val okayFaces = "0.1.1-SNAPSHOT"
 ThisBuild / resolvers += "okay-faces" at "https://okay-effects.github.io/okay-faces/maven"
 ThisBuild / resolvers += "okay-http" at "https://okay-effects.github.io/okay-http/maven"
 
@@ -129,7 +130,13 @@ lazy val reference = crossProject(platforms: _*).crossType(CrossType.Pure).in(fi
 /** THE DEFAULT: okay-scala's machine and okay-faces' faces — `"io.github.okay-effects" %% "okay-ui" % ...` */
 lazy val ui = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("ui"))
   .dependsOn(scala3Kernel, faces)
-  .settings(name := "okay-ui")
+  .settings(name := "okay-ui", libraryDependencies += munit.value)
+  // IN A PAGE: `Laminar.run(root)`, `Ui` into okay-scala's `Lifted[Future]` on okay-faces' Laminar face
+  .whenJs(
+    Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-js",
+    Test / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "test" / "scala-js",
+    libraryDependencies += "io.github.okay-effects" %%% "okay-faces-laminar" % okayFaces,
+    jsdom)
 
 lazy val root = (project in file(".")).aggregate(Seq(core, scala3Kernel, simpleKernel, faces, ui, examples, reference)
   .flatMap(_.componentProjects).map(p => p: ProjectReference): _*)

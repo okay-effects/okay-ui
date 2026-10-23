@@ -163,6 +163,9 @@ object model:
       case s: String => Cell.Text(s)
       case c: Cell => c)))
     def section(title: String)(parts: Part*): Part = Section(title, parts.toList)
+    /** a page elsewhere, by its address: a source to check, a document — never a button */
+    final case class Link(label: String, url: String) extends Part
+    def link(label: String, url: String): Part = Link(label, url)
 
   /**
    * A FORM: fields read together into a `P` — `Form(name, amount, due)` is a `Form[(String, BigDecimal, Day)]`,
@@ -323,12 +326,16 @@ object model:
   /** THE EFFECT: a screen shown, answered by the result of the button pressed */
   enum Ui[X]:
     case Show[A](screen: Screen[A]) extends Ui[A]
+    /** a screen shown WHILE THE PROGRAM GOES ON, answered at once: progress. No button: the next screen replaces it */
+    case Working(screen: Screen[Nothing]) extends Ui[Unit]
 
   /** A PROGRAM OF `Ui`, IN STEPS — of no kernel: what every toolkit drives. `resume` runs the rest of the program up
    * to its next screen; resuming an older `Waiting` again goes back to it */
   enum Step[A]:
     case Done(a: A)
     case Waiting[A, S](screen: Screen[S], resume: S => Step[A]) extends Step[A]
+    /** a screen shown while the program goes on; `next()` the rest, run when the toolkit has shown it */
+    case Working(screen: Screen[Nothing], next: () => Step[A])
 
   extension [A, S](w: Step.Waiting[A, S])
     /** a toolkit's answer: the next step, or the problems to show on this one */
@@ -355,6 +362,7 @@ object model:
       @annotation.tailrec
       def go(step: Step[A], acts: List[Act], seen: List[String]): Played[A] = step match
         case Step.Done(a) => Played(Some(a), seen.reverse, Nil, None)
+        case Step.Working(screen, next) => go(next(), acts, screen.title :: seen)
         case w: Step.Waiting[A, s] =>
           val shown = w.screen.title :: seen
           acts match

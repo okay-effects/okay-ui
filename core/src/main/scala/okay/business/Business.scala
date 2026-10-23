@@ -11,6 +11,10 @@ trait Business extends Kernel:
   /** the screen shown; the result of the button pressed */
   def show[A, R[_]](screen: Screen[A])(using In[Ui, R]): A ! R = perform[Ui](Ui.Show(screen))
 
+  /** a screen shown while the program goes on — progress: answered at once, no button; the next screen replaces it */
+  def working[R[_]](title: String)(parts: Part*)(using In[Ui, R]): Unit ! R =
+    perform[Ui](Ui.Working(Screen[Nothing](title, parts.toList, Nil)))
+
   /** a text, read and acknowledged */
   def inform[R[_]](title: String, text: String)(using In[Ui, R]): Unit ! R =
     show(Screen[Unit](title)(Part.Text(text))(Button("OK", Style.Primary)(())))
@@ -32,8 +36,9 @@ trait Business extends Kernel:
     show(Screen[A](title)()(options.map((label, a) => Button(label)(a))*))
 
   /** THE STANDARD HANDLER: a program of `Ui` in steps, of no kernel — what every toolkit drives. `k` kept in each
-   * `Waiting`, so a toolkit may resume an older one again: back */
+   * `Waiting`, so a toolkit may resume an older one again: back; a `Working` goes on when the toolkit runs `next` */
   def steps[A](p: A ! Ui): Step[A] =
     run(handle[Ui, Ui, Pure, A, Step[A]](p, Handler.General[Ui, Pure, A, Step[A]](a => pure(Step.Done(a)),
       [X] => (op: Ui[X], k: X => Step[A] ! Pure) => op match
-        case Ui.Show(screen) => pure[Step[A], Pure](Step.Waiting(screen, (x: X) => run(k(x))))))(using only[Ui]))
+        case Ui.Show(screen) => pure[Step[A], Pure](Step.Waiting(screen, (x: X) => run(k(x))))
+        case Ui.Working(screen) => pure[Step[A], Pure](Step.Working(screen, () => run(k(()))))))(using only[Ui]))
