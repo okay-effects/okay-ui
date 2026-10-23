@@ -26,5 +26,9 @@ spec first.
   (`ShopPageSuite`) under jsdom from `NODE_PATH` (default /opt/homebrew/lib/node_modules). `examplesJS/web` links the
   shop's page into `examples/.js/target/web`. okay-faces 0.1.0 as republished on 2026-10-23: a rejected form keeps
   what was typed (the first 0.1.0 drew it again empty) — a stale Coursier cache of okay-faces gives the old jars.
+- The reference application (`reference/`, specs/reference.md) shows the rule: data model as effects, every
+  implementation a handler, one line per environment. Keep its mains one line each.
+- A module's Scala.js settings go in `.whenJs(...)` (project/WhenJs.scala), never `.jsSettings`: without
+  `-Dplatforms=js` there is no JS project, and `jsSettings` stops the build from loading.
 - `sbt test`. Lines at most 120 wide. Commits: plain messages,
   no attribution trailers.

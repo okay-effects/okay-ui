@@ -73,6 +73,7 @@ what a field accepts.
 | `simple` | `okay-ui-simple` | core, okay-simple (machine, free) |
 | `faces` | `okay-ui-faces` | core, okay-faces, okay-simple's `okay-effects-cek` (okay-scala's machine) |
 | `examples` | — | all |
+| `reference` | — | `scala3`, `faces`: the reference application, [reference.md](reference.md) |
 
 The default application depends on `okay-ui-scala3` and `okay-ui-faces`: the business program and its screens both
 on okay-scala's machine.

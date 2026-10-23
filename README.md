@@ -64,6 +64,49 @@ Play(steps(addCustomer[Ui]), Act.press("Save", "Name" -> "Ann", "Email" -> "ann@
 - Another toolkit is a loop over `Step`: show the screen, read an `Answer`, call `answer`. See
   [specs/business.md](specs/business.md).
 
+## The reference application
+
+[Expenses](reference/src/main/scala/okay/business/reference), a small personal expense tracker, shows the
+architecture end to end. The data model is effects: what the program asks, and what it is answered. Every
+implementation is a handler, and each environment runs the whole application in one line that names its handlers.
+
+| effect | operations | defined by |
+|---|---|---|
+| `Ledger` | `Entries(): List[Expense]`, `Add(e): Unit`, `Remove(id): Unit` | the application |
+| `Today` | `Now(): Day` | the application |
+| `Ui` | `Show(screen)`: the button pressed | okay-ui |
+
+| handler | effect | where it runs |
+|---|---|---|
+| `Ledger.inMemory(initial)` | `Ledger` | tests |
+| `Ledger.file(path)` | `Ledger` | the JVM: a JSON file |
+| `Ledger.localStorage(key)` | `Ledger` | the browser: `window.localStorage` |
+| `Today.fixed(day)` | `Today` | tests |
+| `Today.system` | `Today` | the JVM (`java.time`), the browser (`js.Date`) |
+| `steps` | `Ui` | everywhere: steps for a toolkit to drive |
+
+The program, `Expenses.main[R[_]: Has[Ui]: Has[Ledger]: Has[Today]]: Unit ! R`, never reads a clock, a file or the
+page. It asks. The three environments differ only in the handlers they name:
+
+```scala
+// the browser
+LaminarFace.mount(OnFaces.program(steps(Ledger.localStorage("expenses")(Today.system(Expenses.main[App])))), page)
+// the terminal
+okay.faces.run(Terminal.console(OnFaces.program(steps(Ledger.file(path)(Today.system(Expenses.main[App]))))))
+// a test
+Play(steps(Ledger.inMemory(Nil)(Today.fixed(day)(Expenses.main[App]))), acts*)
+```
+
+Tests swap handlers, with no mocks and no flags. One script runs against the ledger in memory, in a file (JVM) and in
+local storage (Scala.js), and gives the same records. The page is tested under jsdom.
+
+```text
+sbt "referenceJVM/run expenses.json"        # at a terminal, the records in expenses.json
+sbt -Dplatforms=jvm,js referenceJS/web      # in a browser: open reference/.js/target/web/index.html
+```
+
+The spec, with what was found on the way: [specs/reference.md](specs/reference.md).
+
 ## Modules
 
 | module | artifact | depends on |
@@ -74,6 +117,7 @@ Play(steps(addCustomer[Ui]), Act.press("Save", "Name" -> "Ann", "Email" -> "ann@
 | `faces` | `okay-ui-faces` | okay-faces |
 | `ui` | `okay-ui` | the default: `scala3` and `faces` |
 | `examples` | — | the shop, on every kernel and on okay-faces: at a terminal (JVM), in a page (Scala.js) |
+| `reference` | — | the reference application, Expenses: terminal (JVM), page (Scala.js) |
 
 JVM and Scala.js (`sbt -Dplatforms=jvm,js`).
 

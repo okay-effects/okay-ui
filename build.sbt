@@ -17,6 +17,7 @@ ThisBuild / licenses := List("Apache-2.0" -> url("https://www.apache.org/license
 
 val platformsAsked: Set[String] =
   sys.props.get("platforms").getOrElse("jvm").split(',').map(_.trim.toLowerCase).toSet + "jvm"
+// a module's Scala.js settings are `.whenJs(...)` (project/WhenJs.scala): set only when Scala.js is asked
 val platforms: Seq[sbtcrossproject.Platform] =
   Seq[sbtcrossproject.Platform](JVMPlatform) ++ (if (platformsAsked("js")) Seq(JSPlatform) else Nil)
 val munit = Def.setting("org.scalameta" %%% "munit" % "1.2.3" % Test)
@@ -53,7 +54,21 @@ lazy val faces = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("
 /** THE EXAMPLE, written once on okay-scala; its copies on okay-simple's machine and Free made by changing the import
  * line (and the package) alone — the proof that the kernel is the import. The shop and its scripted tests shared; at a
  * terminal on the JVM (`scala-jvm`), in a page with Scala.js (`scala-js`: `sbt -Dplatforms=js examplesJS/web`) */
-val web = taskKey[File]("the shop's page: index.html and its script, linked, in target/web")
+val web = taskKey[File]("a page: index.html and its script, linked, in target/web")
+/** the module's `web/index.html` and its linked script, `main.js`, side by side in target/web */
+def page(what: String) = Def.task {
+  val linked = (Compile / fastLinkJS).value.data.publicModules.head.jsFileName
+  val from = (Compile / fastLinkJS / scalaJSLinkerOutputDirectory).value / linked
+  val out = target.value / "web"
+  IO.copyFile(baseDirectory.value.getParentFile / "web" / "index.html", out / "index.html")
+  IO.copyFile(from, out / "main.js")
+  streams.value.log.info(s"$what: ${out / "index.html"}")
+  out
+}
+/** the page tested under jsdom, clicked through as a person would; jsdom from NODE_PATH */
+val jsdom = Test / jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(
+  org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv.Config()
+    .withEnv(Map("NODE_PATH" -> sys.env.getOrElse("NODE_PATH", "/opt/homebrew/lib/node_modules"))))
 lazy val examples = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("examples"))
   .dependsOn(scala3Kernel, simpleKernel, faces)
   .settings(name := "okay-ui-examples", publish / skip := true,
@@ -77,31 +92,44 @@ lazy val examples = crossProject(platforms: _*).crossType(CrossType.Pure).in(fil
     Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-jvm",
     Test / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "test" / "scala-jvm",
     libraryDependencies += "io.github.okay-effects" %%% "okay-faces-term" % okayFaces)
-  .jsSettings(
+  .whenJs(
     Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-js",
     Test / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "test" / "scala-js",
     libraryDependencies += "io.github.okay-effects" %%% "okay-faces-laminar" % okayFaces,
     scalaJSUseMainModuleInitializer := true,
     Compile / mainClass := Some("okay.business.examples.InTheBrowser"),
-    // the page tested under jsdom, clicked through as a person would
-    Test / jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(
-      org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv.Config()
-        .withEnv(Map("NODE_PATH" -> sys.env.getOrElse("NODE_PATH", "/opt/homebrew/lib/node_modules")))),
-    web := {
-      val linked = (Compile / fastLinkJS).value.data.publicModules.head.jsFileName
-      val from = (Compile / fastLinkJS / scalaJSLinkerOutputDirectory).value / linked
-      val out = target.value / "web"
-      IO.copyFile(baseDirectory.value.getParentFile / "web" / "index.html", out / "index.html")
-      IO.copyFile(from, out / "main.js")
-      streams.value.log.info(s"the shop's page: ${out / "index.html"}")
-      out
-    })
+    jsdom,
+    web := page("the shop's page").value)
+
+/** THE REFERENCE APPLICATION, Expenses: its data model effects (`Ledger`, `Today`, `Ui`), every implementation a
+ * handler, each environment one line naming its handlers — at a terminal on the JVM, in a page with Scala.js
+ * (`sbt -Dplatforms=jvm,js referenceJS/web`). See specs/reference.md */
+lazy val reference = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("reference"))
+  .dependsOn(scala3Kernel, faces)
+  .settings(name := "okay-ui-reference", publish / skip := true,
+    libraryDependencies ++= Seq(munit.value, "io.github.okay-effects" %%% "okay-effects-json" % okayEffects),
+    Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala",
+    Test / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "test" / "scala")
+  .jvmSettings(
+    Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-jvm",
+    Test / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "test" / "scala-jvm",
+    libraryDependencies += "io.github.okay-effects" %%% "okay-faces-term" % okayFaces,
+    Compile / mainClass := Some("okay.business.reference.AtTheTerminal"),
+    run / fork := true, run / connectInput := true)
+  .whenJs(
+    Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-js",
+    Test / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "test" / "scala-js",
+    libraryDependencies += "io.github.okay-effects" %%% "okay-faces-laminar" % okayFaces,
+    scalaJSUseMainModuleInitializer := true,
+    Compile / mainClass := Some("okay.business.reference.InTheBrowser"),
+    jsdom,
+    web := page("the expenses' page").value)
 
 /** THE DEFAULT: okay-scala's machine and okay-faces' faces — `"io.github.okay-effects" %% "okay-ui" % ...` */
 lazy val ui = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("ui"))
   .dependsOn(scala3Kernel, faces)
   .settings(name := "okay-ui")
 
-lazy val root = (project in file(".")).aggregate(Seq(core, scala3Kernel, simpleKernel, faces, ui, examples)
+lazy val root = (project in file(".")).aggregate(Seq(core, scala3Kernel, simpleKernel, faces, ui, examples, reference)
   .flatMap(_.componentProjects).map(p => p: ProjectReference): _*)
   .settings(publish / skip := true)
