@@ -1,7 +1,6 @@
 package okay.business.faces
 
 import okay.business.model.*
-import okay.effects.json.Json
 import okay.effects.shape.Shape
 import okay.effects.tagless.Program
 import okay.faces.{Action, Face, View}

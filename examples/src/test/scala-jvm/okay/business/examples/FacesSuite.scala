@@ -1,7 +1,7 @@
 package okay.business.examples
 
 import okay.business.faces.OnFaces
-import okay.business.model.{Step, Day}
+import okay.business.model.Step
 import okay.effects.json.Json.{Bool, Num, Str, obj}
 import okay.effects.cek.OnCek.*
 import okay.faces.Chosen

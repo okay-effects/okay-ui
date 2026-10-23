@@ -98,9 +98,9 @@ The build gained `whenJs` (project/WhenJs.scala). A module's Scala.js settings a
 Before it, `jsSettings` on a module without its JS project stopped the build from loading, so a plain `sbt test`
 (JVM only) failed.
 
-## Known: decimals in a real browser (okay-faces)
+## Fixed: decimals in a real browser (okay-faces 0.1.1)
 
-okay-faces 0.1.0's Laminar face draws a number field as `<input type="number">` without `step`. A browser then refuses
-a decimal such as `12.5` before the form is sent: its own validation, with step 1. jsdom does not validate, so the page
-tests pass. This affects every money or decimal field in a page, the shop's too. The fix belongs to okay-faces:
-`step="any"` for `Schema.Number` in `Inputs.of`. Whole amounts work.
+okay-faces 0.1.0's Laminar face drew a number field as `<input type="number">` without `step`, so a browser refused
+a decimal such as `12.5` before the form was sent (its own validation, step 1); jsdom does not validate, so the page
+tests passed. Found by this application's headless run in Chromium; fixed in okay-faces 0.1.1 (`step="any"` on a
+decimal input, in the Laminar and the HTML faces, with a test), which this build uses.
