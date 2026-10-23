@@ -22,10 +22,10 @@ object Expenses:
     Table(es)(Column.date("Day")(_.day), Column.text("Category")(_.category), Column.money("Amount")(_.amount),
       Column.text("Note")(_.note.getOrElse(""))).keyedBy(_.id.toString).whenEmpty("no expenses")
 
-  /** the application, until Quit */
+  /** the application, for as long as it is open: no Quit — in a page it would only leave the page empty, and a
+   * terminal ends the way a terminal does */
   def main[R[_]: Has[Ui]: Has[Ledger]: Has[Today]]: Unit ! R =
-    menu[Int, R]("Expenses", "Add an expense" -> 1, "This month" -> 2, "All expenses" -> 3, "Quit" -> 0).flatMap {
-      case 0 => pure(())
+    menu[Int, R]("Expenses", "Add an expense" -> 1, "This month" -> 2, "All expenses" -> 3).flatMap {
       case 1 => add[R].andThen(defer(main[R]))
       case 2 => thisMonth[R].andThen(defer(main[R]))
       case _ => all[R].andThen(defer(main[R]))

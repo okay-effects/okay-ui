@@ -11,6 +11,6 @@ class InFileSuite extends ExpensesSuite("in a file", () =>
     val path = Files.createTempDirectory("expenses").resolve("expenses.json")
     val first = Ledger.file(path)
     okay.business.scala3.Play(okay.business.scala3.steps(first(Today.fixed(today)(Expenses.main[Expenses.App]))),
-      (three :+ okay.business.scala3.Act.press("Quit"))*)
+      three*)
     assertEquals(Ledger.file(path).entries, kept)
     assertEquals(Expense.read(Files.readString(path)), kept)

@@ -25,7 +25,7 @@ a file or the page: it asks `Today` and `Ledger`.
 
 ## The program
 
-`Expenses.main[R[_]: Has[Ui]: Has[Ledger]: Has[Today]]: Unit ! R`, a menu until Quit:
+`Expenses.main[R[_]: Has[Ui]: Has[Ledger]: Has[Today]]: Unit ! R`, a menu for as long as the application is open:
 
 - **Add an expense**: a form. Amount (money, more than zero), Category (a choice of Food, Transport, Home, Health, Fun,
   Other), Day (a date, starting at today), Note (optional). A rejected value stays on the form, its problem at its
@@ -34,7 +34,8 @@ a file or the page: it asks `Today` and `Ledger`.
   table, and the month's total.
 - **All expenses**: every expense in a table, newest first. A row selected and opened shows its details. Remove asks
   for a confirmation, then removes it.
-- **Quit** ends the program.
+- No **Quit**: in a page it would only leave the page empty; a terminal ends the way a terminal does (Ctrl-C, the end
+  of input).
 
 The program uses okay-ui's model words only: `menu`, `edit`, `show`, `inform`, `confirm`, `Screen`, `Form`, `Field`,
 `Table`, `Column`, `Button`, `Part`.
@@ -98,9 +99,9 @@ The build gained `whenJs` (project/WhenJs.scala). A module's Scala.js settings a
 Before it, `jsSettings` on a module without its JS project stopped the build from loading, so a plain `sbt test`
 (JVM only) failed.
 
-## Fixed: decimals in a real browser (okay-faces 0.1.1)
+## Fixed: decimals in a real browser (okay-faces 0.1.0, republished)
 
-okay-faces 0.1.0's Laminar face drew a number field as `<input type="number">` without `step`, so a browser refused
+The first okay-faces 0.1.0's Laminar face drew a number field as `<input type="number">` without `step`, so a browser refused
 a decimal such as `12.5` before the form was sent (its own validation, step 1); jsdom does not validate, so the page
-tests passed. Found by this application's headless run in Chromium; fixed in okay-faces 0.1.1 (`step="any"` on a
-decimal input, in the Laminar and the HTML faces, with a test), which this build uses.
+tests passed. Found by this application's headless run in Chromium; fixed in okay-faces (`step="any"` on a decimal
+input, in the Laminar and the HTML faces, with a test) and 0.1.0 republished with it — nobody had taken it yet.

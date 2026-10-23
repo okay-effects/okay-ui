@@ -30,9 +30,10 @@ abstract class ExpensesSuite(ledger: String, fresh: () => (Handles[Ledger], () =
   def tables(screen: Option[Screen[?]]): List[List[List[String]]] =
     screen.toList.flatMap(_.inputs.collect { case t: Table[r] => t.rows.map(row => t.cells(row).map(_.text)) })
 
-  test(s"$ledger: expenses added, the day today unless given, then the application left"):
-    val (played, records) = play((three :+ Act.press("Quit"))*)
-    assertEquals(played.result, Some(()))
+  test(s"$ledger: expenses added, the day today unless given, the menu again — the application goes on"):
+    val (played, records) = play(three*)
+    assertEquals(played.result, None)
+    assertEquals(played.at.map(_.title), Some("Expenses"))
     assertEquals(played.seen.take(4), List("Expenses", "Add an expense", "Saved", "Expenses"))
     assertEquals(records, kept)
 
@@ -58,8 +59,8 @@ abstract class ExpensesSuite(ledger: String, fresh: () => (Handles[Ledger], () =
     val (kept1, records1) = play((three ++ open :+ Act.press("No"))*)
     assertEquals(kept1.seen.takeRight(4), List("All expenses", "Expense 1", "Confirm", "All expenses"))
     assertEquals(records1, kept)
-    val (removed, records2) = play((three ++ open ++ List(Act.press("Yes"), Act.press("Back"), Act.press("Quit")))*)
-    assertEquals(removed.result, Some(()))
+    val (removed, records2) = play((three ++ open ++ List(Act.press("Yes"), Act.press("Back")))*)
+    assertEquals(removed.at.map(_.title), Some("Expenses"))
     assertEquals(records2, kept.tail)
 
   test(s"$ledger: all expenses, newest first; opening needs a row"):
