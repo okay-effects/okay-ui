@@ -31,15 +31,18 @@ class FacesSuite extends munit.FunSuite:
   val ann = Chosen("save", obj("name" -> Str("Ann"), "email" -> Str("ann@example.com"), "vip" -> Bool(true)))
 
   for (kernel, start) <- kernels do
-    test(s"$kernel on okay-faces' test face: a customer, an order chosen by its row, the shop left"):
+    test(s"$kernel on okay-faces' test face: a customer, an order chosen by its row, the shop's menu again"):
       val (first, records) = start()
       val played = plays.handle(OnFaces.program(first))(Script.of(Chosen.plain("customers"), Chosen.plain("add"), ann,
         Chosen.plain("ok"), Chosen.plain("back"), Chosen.plain("new-order"),
         Chosen("choose", obj("row" -> Str("Ann | ann@example.com | yes"))),
         Chosen("save", obj("amount" -> Num(12.5), "due" -> Str("2026-11-01"))), Chosen.plain("yes"),
-        Chosen.plain("ok"), Chosen.plain("quit")))
+        Chosen.plain("ok")))
+      // no quit: the script ends with the shop waiting at its menu
       played match
-        case Played.Finished(views, ()) => assert(views.exists(_.toString.contains("The order for Ann is saved")))
+        case Played.Stuck(views, _, None) =>
+          assert(views.exists(_.toString.contains("The order for Ann is saved")))
+          assert(views.last.toString.contains("Heading(1,Shop)"), views.last.toString)
         case other => fail(s"$other")
       assertEquals(records(), (List("Ann <ann@example.com> vip"), List("Ann 12.50 2026-11-01 -")))
 
@@ -56,8 +59,8 @@ class FacesSuite extends munit.FunSuite:
     val m = scala3.Shop.Memory()
     val term = okay.faces.term.Terminal()
     val io = new okay.effects.world.Io()
-    val lines = List("customers", "add", "save", "Ann", "ann@example.com", "y", "ok", "back", "quit")
-    val (printed, result) = run(io.console(lines)(term.handle(OnFaces.program(scala3.Shop.app(m)))))
-    assertEquals(result, Some(()), printed.mkString("\n"))
+    // no quit: the input ends, and the terminal with it
+    val lines = List("customers", "add", "save", "Ann", "ann@example.com", "y", "ok", "back")
+    val (printed, _) = run(io.console(lines)(term.handle(OnFaces.program(scala3.Shop.app(m)))))
     assertEquals(m.customers.map(_.name), List("Ann"))
     assert(printed.exists(_.contains("Ann added")), printed.mkString("\n"))

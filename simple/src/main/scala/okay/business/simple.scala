@@ -1,6 +1,6 @@
 package okay.business
 
-import okay.effects.{Effects, Runner}
+import okay.effects.Runner
 
 /** ON AN IMPLEMENTATION OF OKAY-SIMPLE'S INTERFACE, `fx`: its types are the adapter's */
 class OnSimple[F <: Runner & Singleton](val fx: F) extends Business:

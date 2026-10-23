@@ -9,11 +9,11 @@ abstract class ShopSuite(kernel: String, start: () => (Step[Unit], () => (List[S
     val (first, records) = start()
     (Play(first, acts*), records())
 
-  test(s"$kernel: a customer added, then the shop left"):
+  test(s"$kernel: a customer added, then the shop's menu again — the shop goes on"):
     val (played, (customers, _)) = play(Act.press("Customers"), Act.press("Add"),
       Act.press("Save", "Name" -> "Ann", "Email" -> "ann@example.com", "VIP" -> "yes"), Act.press("OK"),
-      Act.press("Back"), Act.press("Quit"))
-    assertEquals(played.result, Some(()))
+      Act.press("Back"))
+    assertEquals(played.result, None)
     assertEquals(played.seen, List("Shop", "Customers", "New customer", "Saved", "Customers", "Shop"))
     assertEquals(customers, List("Ann <ann@example.com> vip"))
 
@@ -29,9 +29,8 @@ abstract class ShopSuite(kernel: String, start: () => (Step[Unit], () => (List[S
     val (played, (_, orders)) = play(Act.press("Customers"), Act.press("Add"),
       Act.press("Save", "Name" -> "Ann", "Email" -> "ann@example.com"), Act.press("OK"), Act.press("Back"),
       Act.press("New order"), Act.choose("Choose", "Ann"),
-      Act.press("Save", "Amount" -> "12.5", "Due" -> "2026-11-01"), Act.press("Yes"), Act.press("OK"),
-      Act.press("Quit"))
-    assertEquals(played.result, Some(()))
+      Act.press("Save", "Amount" -> "12.5", "Due" -> "2026-11-01"), Act.press("Yes"), Act.press("OK"))
+    assertEquals(played.at.map(_.title), Some("Shop"))
     assertEquals(orders, List("Ann 12.50 2026-11-01 -"))
 
   test(s"$kernel: what a field accepts is the model's — money of three places, a day that is not, nothing chosen"):

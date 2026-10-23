@@ -33,10 +33,9 @@ object Shop:
     case Open(c: Customer)
     case Back
 
-  /** the shop, until Quit */
+  /** the shop, for as long as it is open — no Quit: a page would only be left empty, a terminal ends as one does */
   def main[R[_]: Has[Ui]: Has[Book]]: Unit ! R =
-    menu[Int, R]("Shop", "Customers" -> 1, "New order" -> 2, "Orders" -> 3, "Quit" -> 0).flatMap {
-      case 0 => pure(())
+    menu[Int, R]("Shop", "Customers" -> 1, "New order" -> 2, "Orders" -> 3).flatMap {
       case 1 => customers[R].andThen(defer(main[R]))
       case 2 => newOrder[R].andThen(defer(main[R]))
       case _ => orders[R].andThen(defer(main[R]))

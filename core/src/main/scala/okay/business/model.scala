@@ -158,7 +158,10 @@ object model:
     def info(s: String): Part = Notice(Level.Info, s)
     def warning(s: String): Part = Notice(Level.Warning, s)
     def problem(s: String): Part = Notice(Level.Problem, s)
-    def details(rows: (String, Cell)*): Part = Details(rows.toList)
+    /** label and value: text as it is, or a cell (a flag, money, a day) — no conversion asked of the caller */
+    def details(rows: (String, String | Cell)*): Part = Details(rows.toList.map((label, v) => label -> (v match
+      case s: String => Cell.Text(s)
+      case c: Cell => c)))
     def section(title: String)(parts: Part*): Part = Section(title, parts.toList)
 
   /**
