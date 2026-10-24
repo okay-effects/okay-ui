@@ -64,6 +64,17 @@ class FacesSuite extends munit.FunSuite:
         assert(views.head.toString.contains("Link(the source,https://example.org/)"), views.head.toString)
       case other => fail(s"$other")
 
+  test("a field held back (Field.more) is its action's more on okay-faces: the same values, Options where drawn"):
+    import okay.business.model.{Field, Form, Screen, Button}
+    val form = Form(Field.text("Name"), Field.choice("Speed", "Slow" -> "slow", "Fast" -> "fast").initially("slow")
+      .more)
+    val screen = Screen[Int]("Held")(form)(Button.submit("Go", form)(_ => 1))
+    val go = OnFaces.actions(screen).head
+    assertEquals(go.more, Set("speed"))
+    assertEquals(go.affordance.more, Set("speed"))
+    // nothing about its value: the field decodes as before, its initial value its default
+    assert(go.taken(obj("name" -> Str("Ann"), "speed" -> Str("Slow"))).isRight)
+
   test("at okay-faces' terminal, by lines typed: the shop on okay-scala"):
     val m = scala3.Shop.Memory()
     val term = okay.faces.term.Terminal()

@@ -69,6 +69,13 @@ object Skin:
       |  color: var(--okay-fg); }
       |body .okay-form input:focus, body .okay-form select:focus { border-color: var(--okay-accent); }
       |body .okay-form > .okay-action { align-self: flex-start; min-width: 160px; }
+      |/* the fields held back: Options, a row of its own at the end, its fields as the others when opened */
+      |body .okay-form fieldset > .okay-more { grid-column: 1 / -1; }
+      |body .okay-more > summary { cursor: pointer; width: fit-content; color: var(--okay-accent); font-weight: 600;
+      |  font-size: 0.9em; }
+      |body .okay-more[open] { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      |  gap: 16px 20px; }
+      |body .okay-more[open] > summary { grid-column: 1 / -1; }
       |body .okay-doc { font-size: 0.85em; }
       |body .okay-problems { font-weight: 600; }
       |

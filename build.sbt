@@ -47,7 +47,7 @@ lazy val simpleKernel = crossProject(platforms: _*).crossType(CrossType.Pure).in
     libraryDependencies ++= Seq("io.github.okay-effects" %%% "okay-effects-machine" % okayEffects,
       "io.github.okay-effects" %%% "okay-effects-free" % okayEffects))
 
-/** okay-faces, released (0.1.0 as republished 2026-10-23: `View.Link`) */
+/** okay-faces, released (0.1.0 as republished 2026-10-24: `View.Link`, `Action.more`) */
 val okayFaces = "0.1.0"
 ThisBuild / resolvers += "okay-faces" at "https://okay-effects.github.io/okay-faces/maven"
 ThisBuild / resolvers += "okay-http" at "https://okay-effects.github.io/okay-http/maven"

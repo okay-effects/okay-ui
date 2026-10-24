@@ -68,9 +68,11 @@ object model:
    * starts with, and how it reads an `Entry` — the one checking of every toolkit.
    */
   final case class Field[A](key: String, label: String, kind: Kind, hint: Option[String], initial: Entry,
-    read: Entry => Either[String, A], write: A => Entry, required: Boolean):
+    read: Entry => Either[String, A], write: A => Entry, required: Boolean, held: Boolean = false):
     def keyed(k: String): Field[A] = copy(key = k)
     def hinted(h: String): Field[A] = copy(hint = Some(h))
+    /** one a person rarely changes, its initial value right for most: a toolkit may hold it back, under "Options" */
+    def more: Field[A] = copy(held = true)
     /** starting with `a` */
     def initially(a: A): Field[A] = copy(initial = write(a))
     /** a rule of the business: `message` when `ok` fails */
@@ -79,7 +81,7 @@ object model:
     /** may be left blank: `None` then */
     def optional: Field[Option[A]] =
       Field[Option[A]](key, label, kind, hint, initial, e => if e.isBlank then Right(None) else read(e).map(Some(_)),
-        _.fold(Entry.Blank)(write), required = false)
+        _.fold(Entry.Blank)(write), required = false, held = held)
 
   object Field:
     /** a key from a label: lowercase, dashes for spaces, the rest dropped */

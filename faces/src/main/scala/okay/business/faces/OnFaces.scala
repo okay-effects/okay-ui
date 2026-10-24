@@ -57,7 +57,17 @@ object OnFaces:
     val unique = names.zipWithIndex.map((n, i) => if names.indexOf(n) == i then n else s"$n-${i + 1}")
     screen.buttons.zipWithIndex.zip(unique).map { case ((b, i), name) =>
       if b.needs.isEmpty then Action.plain[Answer](name, b.label)(Answer(i))
-      else Action[Answer, Answer](name, b.label, params(screen, i, b))(a => a)
+      else Action[Answer, Answer](name, b.label, params(screen, i, b))(a => a).withMore(held(screen, b)*)
+    }
+
+  /** the parameters of a button its forms hold back (`Field.more`): drawn under "Options" where a face can */
+  private def held(screen: Screen[?], b: Button[?]): List[String] =
+    val several = b.needs.size > 1
+    b.needs.flatMap {
+      case f: Form[?] =>
+        val i = screen.input(f)
+        f.fields.filter(_.held).map(field => if several then s"$i-${field.key}" else field.key)
+      case _ => Nil
     }
 
   /** a button's parameters: its forms' fields and its tables' rows, read into its `Answer` */

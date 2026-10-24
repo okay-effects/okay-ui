@@ -49,7 +49,10 @@ chosen by ONE import.
 - `Entry` — what a person entered: `Blank`, `Text`, `Number`, `Date`, `Flag`, `Pick(key)`. Toolkits produce entries;
   fields read them. A text entry is accepted by every kind (parsed), so a toolkit of text alone works.
 - `Field[A]`: `key`, `label`, `kind` (`Text`, `LongText`, `Whole`, `Decimal`, `Money(currency)`, `Date`, `Flag`,
-  `Choice(options)`, `Secret`), required or `optional`, `hint`, `initially(a)`, `check(message)(ok)`. Constructors:
+  `Choice(options)`, `Secret`), required or `optional`, `hint`, `initially(a)`, `check(message)(ok)`, `more` — one a
+  person rarely changes, its initial value right for most (2026-10-24): on okay-faces it is the action's `more`, so
+  the Laminar, DOM and HTML faces draw it under a closed "Options" at the end of the form, opened by a problem of it;
+  the terminal and the others ask it as before. Nothing about its value changes. Constructors:
   `Field.text`, `longText`, `whole`, `decimal`, `money`, `date`, `flag`, `choice`, `secret`. The key is made from
   the label unless given.
 - `Form[P]` — fields read together: `Form(name, amount, due)` is a `Form[(String, BigDecimal, Day)]`;
