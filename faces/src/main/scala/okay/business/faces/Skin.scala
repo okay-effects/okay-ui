@@ -73,9 +73,9 @@ object Skin:
       |body .okay-form fieldset > .okay-more { grid-column: 1 / -1; }
       |body .okay-more > summary { cursor: pointer; width: fit-content; color: var(--okay-accent); font-weight: 600;
       |  font-size: 0.9em; }
-      |body .okay-more[open] { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      |  gap: 16px 20px; }
-      |body .okay-more[open] > summary { grid-column: 1 / -1; }
+      |body .okay-more > .okay-field { margin-top: 14px; }
+      |body .okay-more::details-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      |  column-gap: 20px; }
       |body .okay-doc { font-size: 0.85em; }
       |body .okay-problems { font-weight: 600; }
       |
