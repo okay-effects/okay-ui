@@ -34,7 +34,7 @@ only when someone else depends on it.
 
    ```sh
    git worktree add /tmp/okay-ui-pages gh-pages
-   mkdir -p /tmp/okay-ui-pages/maven && rsync -a target/pages-maven/ /tmp/okay-ui-pages/maven/
+   mkdir -p /tmp/okay-ui-pages/maven && rsync -ac target/pages-maven/ /tmp/okay-ui-pages/maven/   # -c: a republished checksum keeps its size
    git -C /tmp/okay-ui-pages add -A && git -C /tmp/okay-ui-pages commit -m "release 0.1.0"
    git -C /tmp/okay-ui-pages push origin gh-pages && git worktree remove /tmp/okay-ui-pages
    git push -f origin v0.1.0
