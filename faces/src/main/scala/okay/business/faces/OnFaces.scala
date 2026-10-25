@@ -89,9 +89,14 @@ object OnFaces:
   def actions(screen: Screen[?]): List[Action[Answer]] =
     val at = placed(screen).values.flatten.toList
     val atIndex = at.map(_._3).toSet
-    val names = screen.buttons.map(b => Action.nameOf(b.label))
-    val unique = names.zipWithIndex.map((n, i) => if names.indexOf(n) == i then n else s"$n-${i + 1}")
-    val bar = screen.buttons.zipWithIndex.zip(unique).filterNot { case ((_, i), _) => atIndex(i) }.map {
+    // names among the bar's buttons alone, a second of a name `-2`: the same names however many buttons stand at
+    // slots — a face keeps the page when only those change
+    val inBar = screen.buttons.zipWithIndex.filterNot((_, i) => atIndex(i))
+    val names = inBar.map((b, _) => Action.nameOf(b.label))
+    val unique = names.zipWithIndex.map((n, j) =>
+      val seen = names.take(j).count(_ == n)
+      if seen == 0 then n else s"$n-${seen + 1}")
+    val bar = inBar.zip(unique).map {
       case ((b, i), name) =>
         if b.needs.isEmpty then Action.plain[Answer](name, b.label)(Answer(i))
         else Action[Answer, Answer](name, b.label, params(screen, i, b))(a => a).withMore(held(screen, b)*)
