@@ -153,3 +153,9 @@ JSON text (the model stays free of a JSON library). A toolkit goes on (`Play`, `
 makes it okay-faces' own point (`Face.Mark`), which a host that loses its memory keeps instead of the way there
 (okay-faces' specs/cloudflare.md). The reference application's menu is its point, its state the records
 (specs/reference.md): a ledger of them starts it there again.
+
+## A QR code (2026-10-25)
+
+`Part.qr(text, alt)`: a QR code on a screen — an address for a phone's camera. The model holds the text alone; the
+code is the toolkit's: `OnFaces` makes it okay-faces' `View.qr` (a picture, dark on light in either scheme), a
+toolkit with no pictures says `alt` or the text.

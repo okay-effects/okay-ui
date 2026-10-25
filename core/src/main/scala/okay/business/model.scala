@@ -180,6 +180,10 @@ object model:
       case Label(x: Double, y: Double, text: String, anchor: String = "start")
     def picture(width: Int, height: Int, text: String)(shapes: Shape*): Part = Picture(width, height, shapes.toList,
       text)
+    /** A QR CODE of a text — an address for a phone's camera: the code the toolkit's (okay-faces' `View.qr`); in words,
+     * `alt` or the text */
+    final case class Qr(text: String, alt: Option[String]) extends Part
+    def qr(text: String, alt: String = ""): Part = Qr(text, Option(alt).filter(_.nonEmpty))
     /** parts together under a mark — a card, a bubble, a bar; its look the skin's */
     final case class Block(mark: String, title: Option[String], parts: List[Part]) extends Part
     def block(mark: String, title: String = "")(parts: Part*): Part =

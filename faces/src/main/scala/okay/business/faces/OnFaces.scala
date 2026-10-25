@@ -81,6 +81,7 @@ object OnFaces:
         View.Marked(s"button-${b.style.toString.toLowerCase}", View.Marked("button", View.Ref(key, b.label))))
       if buttons.isEmpty then Nil else List(View.Marked("slot", View.Group(None, buttons.toVector)))
     case Part.Link(label, url) => List(View.Link(label, url))
+    case Part.Qr(text, alt) => List(View.qr(text, alt))
     // A PICTURE, as data on both sides: okay-faces' View.Picture
     case Part.Picture(w, h, shapes, text) => List(View.Picture(w, h, shapes.toVector.map {
         case Part.Shape.Box(x, y, bw, bh, m, t) => View.Picture.Box(x, y, bw, bh, m, t)
