@@ -168,6 +168,18 @@ object model:
     /** a page elsewhere, by its address: a source to check, a document — never a button */
     final case class Link(label: String, url: String) extends Part
     def link(label: String, url: String): Part = Link(label, url)
+    /** A PICTURE THE PROGRAM DESCRIBES, as data: shapes on a `width` × `height` canvas, each marked with the
+     * application's word for its look; `text` the picture in words, for a face with no pictures */
+    final case class Picture(width: Int, height: Int, shapes: List[Shape], text: String) extends Part
+    enum Shape:
+      /** a box: its corner, its size */
+      case Box(x: Double, y: Double, w: Double, h: Double, mark: String, title: String)
+      /** a flow from (x0, y0) to (x1, y1), `thickness` wide */
+      case Band(x0: Double, y0: Double, x1: Double, y1: Double, thickness: Double, mark: String, title: String)
+      /** a text at (x, y), anchored at its `start`, `middle` or `end` */
+      case Label(x: Double, y: Double, text: String, anchor: String = "start")
+    def picture(width: Int, height: Int, text: String)(shapes: Shape*): Part = Picture(width, height, shapes.toList,
+      text)
     /** parts together under a mark — a card, a bubble, a bar; its look the skin's */
     final case class Block(mark: String, title: Option[String], parts: List[Part]) extends Part
     def block(mark: String, title: String = "")(parts: Part*): Part =

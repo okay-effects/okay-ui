@@ -75,6 +75,14 @@ class FacesSuite extends munit.FunSuite:
     // nothing about its value: the field decodes as before, its initial value its default
     assert(go.taken(obj("name" -> Str("Ann"), "speed" -> Str("Slow"))).isRight)
 
+  test("a picture (Part.Picture) is okay-faces' View.Picture: its shapes, their marks, its words"):
+    import okay.business.model.{Part, Screen, Button}
+    val pic = Part.picture(100, 40, "5 ETH to Binance")(Part.Shape.Box(0, 0, 10, 40, "start", "start"),
+      Part.Shape.Band(10, 20, 90, 20, 12, "exchange", "5 ETH"), Part.Shape.Label(95, 20, "Binance", "end"))
+    val view = OnFaces.view(Screen[Int]("Pic")(pic)(Button("OK")(1)), Nil)
+    assert(view.toString.contains("Picture(100,40,Vector(Box(0.0,0.0,10.0,40.0,start,start), Band(10.0,20.0,90.0," +
+      "20.0,12.0,exchange,5 ETH), Label(95.0,20.0,Binance,end)),5 ETH to Binance)"), view.toString)
+
   test("at okay-faces' terminal, by lines typed: the shop on okay-scala"):
     val m = scala3.Shop.Memory()
     val term = okay.faces.term.Terminal()

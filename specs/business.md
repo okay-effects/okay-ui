@@ -61,6 +61,10 @@ chosen by ONE import.
 - `Button[A]`: `Button(label)(a)`; `Button.submit(label, form)(p => a)` reads and checks the form;
   `Button.select(label, table)(r => a)` needs a selected row. A style: `Primary`, `Plain`, `Danger`.
 - `Part` — what a screen holds: `Text`, `Notice(level)`, `Details`, a `Form`, a `Table`, a `Section`, a
+  `Picture(width, height, shapes, text)` (2026-10-25) — a picture the program describes as data: `Shape.Box`,
+  `Shape.Band` (a flow from a point to a point, so wide), `Shape.Label`, each shape marked with the application's
+  word for its look, and the picture in words for a face with no pictures; on okay-faces its `View.Picture` (an
+  `<svg>` in a page, the words at a terminal).
   `Link(label, url)` — a page elsewhere, a source to check (okay-faces' `View.Link`: an anchor in a page, `label
   <url>` at a terminal).
 - `Screen[A](title)(parts*)(buttons*)`. `screen.press(answer)`: the button's result, or the problems — the same
