@@ -69,5 +69,11 @@
             <url>https://okay-effects.github.io/okay-http/maven/</url>
             <layout>default</layout>
         </repository>
+        <repository>
+            <id>okay-mcp</id>
+            <name>okay-mcp</name>
+            <url>https://okay-effects.github.io/okay-mcp/maven/</url>
+            <layout>default</layout>
+        </repository>
     </repositories>
 </project>
