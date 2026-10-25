@@ -3,7 +3,7 @@ package okay.business.faces
 import okay.business.model.*
 import okay.effects.shape.Shape
 import okay.effects.tagless.Program
-import okay.faces.{Action, Face, View}
+import okay.faces.{Action, Face, Meanwhile, View}
 import okay.faces.splitOne
 
 /**
@@ -23,25 +23,59 @@ object OnFaces:
       okay.faces.flatMap(okay.faces.show[Face](view(screen, Nil)))(_ => program(next()))
 
   private def waiting[A, S](w: Step.Waiting[A, S], problems: Problems): Program[A, Face] =
-    okay.faces.flatMap(okay.faces.offer[Answer, Face](view(w.screen, problems), actions(w.screen))) { answer =>
-      w.answer(answer) match
-        case Left(ps) => waiting(w, ps)
-        case Right(next) => program(next)
-    }
+    def answered(answer: Answer): Program[A, Face] = w.answer(answer) match
+      case Left(ps) => waiting(w, ps)
+      case Right(next) => program(next)
+    w.screen.events match
+      case None =>
+        okay.faces.flatMap(okay.faces.offer[Answer, Face](view(w.screen, problems), actions(w.screen)))(answered)
+      // AN EVENT MEANWHILE answers the screen as a button would: the step's `Meanwhile`
+      case Some(events) =>
+        val pressed: List[Action[Either[S, Answer]]] = actions(w.screen).map(a =>
+          Action.of[a.P, Either[S, Answer]](a.name, a.label, a.params, a.doc, a.more, a.long)(p => Right(a.make(p))))
+        val meanwhile = new Meanwhile[Either[S, Answer]](k => events.register(s => k(Left(s))))
+        okay.faces.flatMap(okay.faces.offer[Either[S, Answer], Face](view(w.screen, problems), pressed, meanwhile)) {
+          case Left(s) => program(w.resume(s))
+          case Right(answer) => answered(answer)
+        }
 
   // ---- WHAT IS SHOWN
 
   def view(screen: Screen[?], problems: Problems): View =
+    val at = placed(screen)
     View.stack((View.heading(screen.title) :: problems.map(p => View.problem(p.message)) :::
-      screen.parts.flatMap(part))*)
+      screen.parts.flatMap(part(_, at)))*)
 
-  private def part(p: Part): List[View] = p match
+  /** THE BUTTONS AT A SLOT: those that need no input and whose slot is on the screen — each with its key, a ref's */
+  def placed(screen: Screen[?]): Map[String, List[(Button[?], String, Int)]] =
+    def slots(ps: List[Part]): List[String] = ps.flatMap {
+      case Part.Slot(n) => List(n)
+      case Part.Section(_, inner) => slots(inner)
+      case Part.Block(_, _, inner) => slots(inner)
+      case _ => Nil
+    }
+    val there = slots(screen.parts).toSet
+    val at = screen.buttons.zipWithIndex.collect {
+      case (b, i) if b.needs.isEmpty && b.slot.exists(there) => (b, s"${b.slot.get}/${Action.nameOf(b.label)}", i)
+    }
+    // a key twice: its place added
+    val keys = at.map(_._2)
+    at.zipWithIndex.map { case ((b, k, i), j) => (b, if keys.indexOf(k) == j then k else s"$k-$i", i) }
+      .groupBy(_._1.slot.get)
+
+  private def part(p: Part, at: Map[String, List[(Button[?], String, Int)]]): List[View] = p match
     case Part.Text(s) => List(View.text(s))
     case Part.Notice(Level.Info, s) => List(View.info(s))
     case Part.Notice(Level.Warning, s) => List(View.warning(s))
     case Part.Notice(Level.Problem, s) => List(View.problem(s))
     case Part.Details(rows) => List(View.Fields(rows.map((l, c) => l -> View.text(c.text)).toVector))
-    case Part.Section(title, parts) => List(View.Group(Some(title), parts.flatMap(part).toVector))
+    case Part.Section(title, parts) => List(View.Group(Some(title), parts.flatMap(part(_, at)).toVector))
+    case Part.Block(mark, title, parts) =>
+      List(View.Marked(mark, View.Group(title, parts.flatMap(part(_, at)).toVector)))
+    case Part.Slot(name) =>
+      val buttons = at.getOrElse(name, Nil).map((b, key, _) =>
+        View.Marked(s"button-${b.style.toString.toLowerCase}", View.Marked("button", View.Ref(key, b.label))))
+      if buttons.isEmpty then Nil else List(View.Marked("slot", View.Group(None, buttons.toVector)))
     case Part.Link(label, url) => List(View.Link(label, url))
     case t: Table[r] =>
       if t.rows.isEmpty then List(View.text(t.empty))
@@ -53,11 +87,31 @@ object OnFaces:
   // ---- WHAT CAN BE DONE
 
   def actions(screen: Screen[?]): List[Action[Answer]] =
+    val at = placed(screen).values.flatten.toList
+    val atIndex = at.map(_._3).toSet
     val names = screen.buttons.map(b => Action.nameOf(b.label))
     val unique = names.zipWithIndex.map((n, i) => if names.indexOf(n) == i then n else s"$n-${i + 1}")
-    screen.buttons.zipWithIndex.zip(unique).map { case ((b, i), name) =>
-      if b.needs.isEmpty then Action.plain[Answer](name, b.label)(Answer(i))
-      else Action[Answer, Answer](name, b.label, params(screen, i, b))(a => a).withMore(held(screen, b)*)
+    val bar = screen.buttons.zipWithIndex.zip(unique).filterNot { case ((_, i), _) => atIndex(i) }.map {
+      case ((b, i), name) =>
+        if b.needs.isEmpty then Action.plain[Answer](name, b.label)(Answer(i))
+        else Action[Answer, Answer](name, b.label, params(screen, i, b))(a => a).withMore(held(screen, b)*)
+          .withLong(long(screen, b)*)
+    }
+    // the buttons at slots: refs, chosen by their keys
+    val keys = at.map((_, key, i) => key -> i).toMap
+    val key = Shape.Field[String]("key", Shape.choice(keys.keys.toList.sorted.map(k => k -> k)*), Some("Button"))
+    val ref = Option.when(at.nonEmpty)(Action[String, Answer]("ref", "Press",
+      Shape.fields[String](List(key))(vs => vs.head.asInstanceOf[String])(k => List(k)))(k => Answer(keys(k))))
+    bar ++ ref.toList
+
+  /** the parameters of a button that are long text (`Kind.LongText`): text areas where a face can */
+  private def long(screen: Screen[?], b: Button[?]): List[String] =
+    val several = b.needs.size > 1
+    b.needs.flatMap {
+      case f: Form[?] =>
+        val i = screen.input(f)
+        f.fields.filter(_.kind == Kind.LongText).map(field => if several then s"$i-${field.key}" else field.key)
+      case _ => Nil
     }
 
   /** the parameters of a button its forms hold back (`Field.more`): drawn under "Options" where a face can */

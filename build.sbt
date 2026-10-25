@@ -143,7 +143,8 @@ lazy val ui = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("ui"
   .whenJs(
     Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-js",
     Test / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "test" / "scala-js",
-    libraryDependencies += "io.github.okay-effects" %%% "okay-faces-laminar" % okayFaces,
+    libraryDependencies ++= Seq("io.github.okay-effects" %%% "okay-faces-laminar" % okayFaces,
+      "io.github.okay-effects" %%% "okay-faces-dom" % okayFaces),
     jsdom)
 
 lazy val root = (project in file(".")).aggregate(Seq(core, scala3Kernel, simpleKernel, faces, ui, examples, reference)

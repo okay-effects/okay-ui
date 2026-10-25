@@ -168,6 +168,13 @@ object model:
     /** a page elsewhere, by its address: a source to check, a document — never a button */
     final case class Link(label: String, url: String) extends Part
     def link(label: String, url: String): Part = Link(label, url)
+    /** parts together under a mark — a card, a bubble, a bar; its look the skin's */
+    final case class Block(mark: String, title: Option[String], parts: List[Part]) extends Part
+    def block(mark: String, title: String = "")(parts: Part*): Part =
+      Block(mark, Option(title).filter(_.nonEmpty), parts.toList)
+    /** where the screen's buttons `at(name)` stand */
+    final case class Slot(name: String) extends Part
+    def slot(name: String): Part = Slot(name)
 
   /**
    * A FORM: fields read together into a `P` — `Form(name, amount, due)` is a `Form[(String, BigDecimal, Day)]`,
@@ -265,8 +272,10 @@ object model:
 
   /** A BUTTON: its label, its style, the inputs it needs, and what pressing it gives */
   final class Button[A](val label: String, val style: Style, val needs: List[Part],
-    val make: Inputs => Either[Problems, A]):
-    def styled(s: Style): Button[A] = new Button(label, s, needs, make)
+    val make: Inputs => Either[Problems, A], val slot: Option[String] = None):
+    def styled(s: Style): Button[A] = new Button(label, s, needs, make, slot)
+    /** standing at the screen's `Part.Slot(name)` instead of with the others: a button that needs no input */
+    def at(name: String): Button[A] = new Button(label, style, needs, make, Some(name))
 
   object Button:
     /** pressed, gives `a` */
@@ -286,11 +295,15 @@ object model:
     selected: Map[Int, String] = Map.empty)
 
   /** A SCREEN: its title, what it holds, its buttons; pressing one gives an `A` */
-  final case class Screen[A](title: String, parts: List[Part], buttons: List[Button[A]]):
+  final case class Screen[A](title: String, parts: List[Part], buttons: List[Button[A]],
+    events: Option[Events[A]] = None):
+    /** answered by a button pressed or by an event, whichever comes first */
+    def until(e: Events[A]): Screen[A] = copy(events = Some(events.fold(e)(Events.merge(_, e))))
     /** its forms and tables, in order: a toolkit's inputs, numbered */
     val inputs: Vector[Part] =
       def walk(ps: List[Part]): List[Part] = ps.flatMap {
         case Part.Section(_, inner) => walk(inner)
+        case Part.Block(_, _, inner) => walk(inner)
         case f: Form[?] => List(f)
         case t: Table[?] => List(t)
         case _ => Nil
@@ -322,6 +335,28 @@ object model:
   object Screen:
     def apply[A](title: String)(parts: Part*)(buttons: Button[A]*): Screen[A] =
       Screen[A](title, parts.toList, buttons.toList)
+
+  /** WHAT HAPPENS MEANWHILE, of no toolkit: `register(k)` calls `k` with each event until what it gave is called */
+  final class Events[A](val register: (A => Unit) => (() => Unit)):
+    def map[B](f: A => B): Events[B] = Events(k => register(a => k(f(a))))
+
+  object Events:
+    def apply[A](register: (A => Unit) => (() => Unit)): Events[A] = new Events(register)
+    def none[A]: Events[A] = Events(_ => () => ())
+    def merge[A](es: Events[A]*): Events[A] = Events { k =>
+      val stops = es.map(_.register(k))
+      () => stops.foreach(_())
+    }
+    /** fired by hand: a test's, an application's bus */
+    def manual[A]: Manual[A] = new Manual[A]
+    final class Manual[A]:
+      private var listeners = Vector.empty[A => Unit]
+      val events: Events[A] = Events { k =>
+        listeners :+= k
+        () => listeners = listeners.filterNot(_ eq k)
+      }
+      def fire(a: A): Unit = listeners.foreach(_(a))
+      def listening: Int = listeners.size
 
   // ---- THE EFFECT AND ITS STEPS
 

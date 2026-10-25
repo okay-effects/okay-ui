@@ -100,6 +100,15 @@ object Skin:
       |  body .okay-actions > .okay-action { flex: 1 1 auto; }
       |}
       |@media (prefers-reduced-motion: reduce) { body .okay-action { transition: none; } }
+      |
+      |/* buttons at a slot (button.at): in a row where the screen puts them, drawn as buttons */
+      |body .okay-mark-slot > .okay-group { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; }
+      |body .okay-mark-button > .okay-ref { display: inline-flex; align-items: center; justify-content: center;
+      |  min-height: 40px; padding: 8px 16px; border-radius: 10px; text-decoration: none; font-weight: 600;
+      |  border: 1px solid var(--okay-border); background: var(--okay-surface); color: var(--okay-fg); }
+      |body .okay-mark-button-primary > .okay-mark-button > .okay-ref { background: var(--okay-accent);
+      |  border-color: var(--okay-accent); color: #ffffff; }
+      |body .okay-mark-button-danger > .okay-mark-button > .okay-ref { color: var(--okay-problem); }
       |body .okay-form input[type="checkbox"] { width: 22px; height: 22px; padding: 0; align-self: flex-start;
       |  margin: 8px 0;
       |  accent-color: var(--okay-accent); }

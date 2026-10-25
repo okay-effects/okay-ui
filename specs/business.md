@@ -68,6 +68,28 @@ chosen by ONE import.
 - `Answer(button, entries, selected)` — a button by its index, entries by (input, field key), selections by input;
   inputs are the screen's forms and tables numbered in order.
 
+### Live screens (2026-10-25, for okay-guard's page)
+
+A screen that changes while it is shown — a timeline of what an agent does, a call waiting for a person, a clock —
+is still a screen, shown again; what is new is what may answer it and where its buttons stand:
+
+- `Events[A]` — what happens meanwhile, of no toolkit: `Events(register)` (`register(k)` gives what stops it),
+  `map`, `merge`, `Events.manual` (fired by hand: a test's, an application's bus). `screen.until(events)`: the
+  screen answered by a button pressed OR by an event, whichever comes first. On okay-faces it is the step's
+  `Meanwhile`; `Play` presses buttons only.
+- `Part.Block(mark, title, parts)` — parts together under a mark (a card, a bubble, a bar): okay-faces'
+  `View.Marked(mark, View.Group(title, ...))`, its look the skin's (`okay-mark-<mark>`). Forms and tables inside one
+  are inputs as anywhere.
+- `Part.Slot(name)` and `button.at(name)` — a button that stands where the screen says (Approve and Refuse in the
+  card of the call they answer; the places of an application in its bar) instead of with the others. A button at a
+  slot needs no input (a form's button stays with the forms); on okay-faces it is a live `Ref` (the action `ref`),
+  drawn where its slot is, marked `button` and `button-<style>`. A slot not on the screen: the button with the
+  others.
+- `Kind.LongText` is a text area (okay-faces' `Action.long`).
+
+In a page the screens of one program are ONE face (`Dom.run(root, skin)`, okay-faces' DOM face): a screen that
+follows another with the same buttons changes the page in place — what was typed stays, the focus, the scroll.
+
 ## The words
 
 `show(screen)`, `inform(title, text)`, `confirm(question)`, `edit(title, form)`, `pick(title, table)`,
