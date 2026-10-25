@@ -67,6 +67,13 @@ class DomSuite extends munit.FunSuite:
       done <- result
     yield assertEquals(done, "half\ntyped at 3")
 
+  test("the look's stylesheet in the page, before the face"):
+    val root = fresh()
+    val bus = Events.manual[Int]
+    val _ = Lift.lower(Dom.run(root)(timeline(bus, 1)))
+    for _ <- settled
+    yield assert(root.querySelector(".okay-ui > style") != null, root.innerHTML.take(300))
+
   test("a button at its slot: in the card, a ref; pressed after an event, it answers the screen shown now"):
     val root = fresh()
     val bus = Events.manual[Int]

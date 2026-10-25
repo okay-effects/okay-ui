@@ -28,6 +28,8 @@ object Dom:
         if !mounted then
           val frame = dom.document.createElement("div")
           frame.setAttribute("class", "okay-ui")
+          // the look's own stylesheet first, as okay-faces' faces put it: the skin's rules go over it
+          frame.appendChild(face.world(face.stylesheet(skin.look)))
           frame.appendChild(session.element)
           root.appendChild(frame)
           mounted = true
