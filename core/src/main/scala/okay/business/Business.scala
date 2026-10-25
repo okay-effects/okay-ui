@@ -15,6 +15,10 @@ trait Business extends Kernel:
   def working[R[_]](title: String)(parts: Part*)(using In[Ui, R]): Unit ! R =
     perform[Ui](Ui.Working(Screen[Nothing](title, parts.toList, Nil)))
 
+  /** THE PROGRAM AT A POINT IT CAN BE TAKEN UP FROM, its state as JSON text: a host that loses its memory keeps it,
+   * and starts the program there again (okay-faces' points, `Durable`) */
+  def mark[R[_]](point: String, state: String)(using In[Ui, R]): Unit ! R = perform[Ui](Ui.Mark(point, state))
+
   /** a text, read and acknowledged */
   def inform[R[_]](title: String, text: String)(using In[Ui, R]): Unit ! R =
     show(Screen[Unit](title)(Part.Text(text))(Button("OK", Style.Primary)(())))
@@ -41,4 +45,6 @@ trait Business extends Kernel:
     run(handle[Ui, Ui, Pure, A, Step[A]](p, Handler.General[Ui, Pure, A, Step[A]](a => pure(Step.Done(a)),
       [X] => (op: Ui[X], k: X => Step[A] ! Pure) => op match
         case Ui.Show(screen) => pure[Step[A], Pure](Step.Waiting(screen, (x: X) => run(k(x))))
-        case Ui.Working(screen) => pure[Step[A], Pure](Step.Working(screen, () => run(k(()))))))(using only[Ui]))
+        case Ui.Working(screen) => pure[Step[A], Pure](Step.Working(screen, () => run(k(()))))
+        case Ui.Mark(point, state) => pure[Step[A], Pure](Step.Marked(point, state, () => run(k(()))))))(
+      using only[Ui]))

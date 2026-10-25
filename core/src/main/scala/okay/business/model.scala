@@ -377,6 +377,9 @@ object model:
     case Show[A](screen: Screen[A]) extends Ui[A]
     /** a screen shown WHILE THE PROGRAM GOES ON, answered at once: progress. No button: the next screen replaces it */
     case Working(screen: Screen[Nothing]) extends Ui[Unit]
+    /** THE PROGRAM AT A POINT IT CAN BE TAKEN UP FROM: its name, its state as data (JSON text) — a host that loses its
+     * memory keeps it instead of the way there, and starts the program there again; a toolkit goes on */
+    case Mark(point: String, state: String) extends Ui[Unit]
 
   /** A PROGRAM OF `Ui`, IN STEPS — of no kernel: what every toolkit drives. `resume` runs the rest of the program up
    * to its next screen; resuming an older `Waiting` again goes back to it */
@@ -385,6 +388,8 @@ object model:
     case Waiting[A, S](screen: Screen[S], resume: S => Step[A]) extends Step[A]
     /** a screen shown while the program goes on; `next()` the rest, run when the toolkit has shown it */
     case Working(screen: Screen[Nothing], next: () => Step[A])
+    /** a point passed (`Ui.Mark`); `next()` the rest */
+    case Marked(point: String, state: String, next: () => Step[A])
 
   extension [A, S](w: Step.Waiting[A, S])
     /** a toolkit's answer: the next step, or the problems to show on this one */
@@ -412,6 +417,7 @@ object model:
       def go(step: Step[A], acts: List[Act], seen: List[String]): Played[A] = step match
         case Step.Done(a) => Played(Some(a), seen.reverse, Nil, None)
         case Step.Working(screen, next) => go(next(), acts, screen.title :: seen)
+        case Step.Marked(_, _, next) => go(next(), acts, seen)
         case w: Step.Waiting[A, s] =>
           val shown = w.screen.title :: seen
           acts match

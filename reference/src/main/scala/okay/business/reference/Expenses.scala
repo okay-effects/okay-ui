@@ -25,11 +25,16 @@ object Expenses:
   /** the application, for as long as it is open: no Quit — in a page it would only leave the page empty, and a
    * terminal ends the way a terminal does */
   def main[R[_]: Has[Ui]: Has[Ledger]: Has[Today]]: Unit ! R =
+    // the point the application can be taken up from: its menu, its state the records (`Expense.write`) — a host that
+    // loses its memory keeps them, and starts here again with a ledger of them
+    perform[Ledger](Ledger.Entries()).flatMap(es => mark[R](Expenses.point, Expense.write(es))).andThen(
     menu[Int, R]("Expenses", "Add an expense" -> 1, "This month" -> 2, "All expenses" -> 3).flatMap {
       case 1 => add[R].andThen(defer(main[R]))
       case 2 => thisMonth[R].andThen(defer(main[R]))
       case _ => all[R].andThen(defer(main[R]))
-    }
+    })
+  /** the menu's point */
+  val point = "expenses"
 
   def add[R[_]: Has[Ui]: Has[Ledger]: Has[Today]]: Unit ! R =
     perform[Today](Today.Now()).flatMap { today =>

@@ -156,8 +156,8 @@ lazy val referenceCloudflare = crossProject(platforms: _*).crossType(CrossType.P
       val out = baseDirectory.value.getParentFile / "worker"
       IO.copyFile(from, out / "main.js")
       // the thin page's script, okay-faces' DOM remote face alone, as the Worker's entry takes it: text
-      val thin = (referenceThin.js / Compile / fullLinkJS).value.data.publicModules.head.jsFileName
-      IO.copyFile((referenceThin.js / Compile / fullLinkJS / scalaJSLinkerOutputDirectory).value / thin,
+      val thin = (LocalProject("referenceThinJS") / Compile / fullLinkJS).value.data.publicModules.head.jsFileName
+      IO.copyFile((LocalProject("referenceThinJS") / Compile / fullLinkJS / scalaJSLinkerOutputDirectory).value / thin,
         out / "page.js.txt")
       streams.value.log.info(s"the Worker: $out")
       out

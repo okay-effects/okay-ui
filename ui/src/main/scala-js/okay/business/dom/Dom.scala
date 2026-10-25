@@ -45,5 +45,7 @@ object Dom:
           Lift.lift[Future, X, Rest](pressed.future).flatMap(k)
         case Ui.Working(screen) =>
           draw[Nothing](screen, _ => ())
-          k(())))
+          k(())
+        // a point passed: a page keeps nothing of it
+        case Ui.Mark(_, _) => k(())))
     }

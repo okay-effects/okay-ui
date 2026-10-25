@@ -79,11 +79,13 @@ Cloudflare.serve(Door.shell("Expenses", Cloudflare.asset("/index.js"), look),
 ON CLOUDFLARE (`OnCloudflare`, okay-faces' `web/cloudflare`, its spec `specs/cloudflare.md` there): a deploying, not a
 change — the program is the same; okay-faces' HTML and REST faces serve it, each session a Durable Object. The ledger
 is the session's, in memory (`Door` makes the program again for each session), and it lasts as the session does: the
-session's journal of requests, played when the object wakes, adds the same expenses again. `reference/cloudflare/
+menu is the program's POINT (`mark(Expenses.point, Expense.write(records))`), so the session keeps its records, not
+the way it came (the request that opened it, the point, the few requests since); a session woken starts at the menu
+with a ledger of them (`OnCloudflare.from`). `reference/cloudflare/
 deploy.sh` (`wrangler dev`, or `deploy`; the thin page okay-faces' DOM remote face alone, `reference/thin`, told by
 its session's socket when it moved), `e2e.js` (two expenses by the pages, one by an agent over MCP, the thin page
-following a move made elsewhere, the Worker started again: all there; another session has none). Not yet: a ledger shared by a person's sessions (a `Ledger` over the object's storage, its answers
-later), the date journaled.
+following a move made elsewhere, the Worker started again: all there; another session has none). Not yet: a
+ledger shared by a person's sessions (a `Ledger` over the object's storage, its answers later).
 
 `App = Ui + Ledger + Today`. Read from the inside out: the program, `Today` handled, `Ledger` handled, `Ui` turned
 into steps, the steps driven by a toolkit.

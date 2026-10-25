@@ -145,3 +145,11 @@ on okay-scala's machine.
 
 The same example application on every kernel, under `Play` and under okay-faces' test face `Plays`; the one program
 word for word with only its import changed.
+
+## Points: where a program can be taken up again (2026-10-25)
+
+`mark(point, state)` (`Ui.Mark`, `Step.Marked`): the program is at a point it can be taken up from, its state as
+JSON text (the model stays free of a JSON library). A toolkit goes on (`Play`, `Dom.run`, `Laminar.run`); `OnFaces`
+makes it okay-faces' own point (`Face.Mark`), which a host that loses its memory keeps instead of the way there
+(okay-faces' specs/cloudflare.md). The reference application's menu is its point, its state the records
+(specs/reference.md): a ledger of them starts it there again.

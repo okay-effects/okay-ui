@@ -74,11 +74,21 @@ const add = async (page, amount, category, note) => {
   for (let i = 0; i < 20 && !(await js("/All expenses|no expenses/i.test(document.body.innerText)")); i++) await sleep(250);
   check("moved from elsewhere, the page follows", await js("/All expenses|no expenses/i.test(document.body.innerText)"));
   chrome.kill();
+  // a turn begun: the form open — then the Worker started again in the middle of it
+  await act(page, "back"); // from all the expenses to the menu: its point passed, the records its state
+  await act(page, "add-an-expense");
+  const formOpen = async () => /Add an expense/.test(await text(page)) && /Category/.test(await text(page)) &&
+    !/All expenses/.test(await text(page));
+  check("the form open", await formOpen());
   await stop(); await start();
-  const again = await text(page);
-  check("after a restart: Lunch and Ticket", /Lunch/.test(again) && /Ticket/.test(again));
   const after = await call("all-expenses");
   check("after a restart, the agent's session: Cinema", /Cinema/.test(after));
+  check("after a restart, the form still open (the menu's point, and the one request since)", await formOpen());
+  await act(page, "save", { amount: "4.10", category: "Food", day: "2026-10-22", note: "Coffee" });
+  await act(page, "ok");
+  await act(page, "all-expenses");
+  const all3 = await text(page);
+  check("saved on from there: Lunch, Ticket, Coffee", /Lunch/.test(all3) && /Ticket/.test(all3) && /Coffee/.test(all3));
   const other = await open();
   await act(other, "all-expenses");
   check("another session: none of them", !/Lunch/.test(await text(other)));
