@@ -60,7 +60,7 @@ a list of expenses is also no expenses, so a corrupt value does not stop the app
 cannot be read is skipped. Platform handlers live in `scala-jvm` and `scala-js` source directories. `Ledger` and
 `Today` get them through a trait that each platform defines.
 
-## The three one-line runs
+## The one-line runs
 
 ```scala
 // the browser (Scala.js)
@@ -69,7 +69,18 @@ LaminarFace.mount(OnFaces.program(steps(Ledger.localStorage("expenses")(Today.sy
 okay.faces.run(Terminal.console(OnFaces.program(steps(Ledger.file(path)(Today.system(Expenses.main[App]))))))
 // a test
 Play(steps(Ledger.inMemory(Nil)(Today.fixed(day)(Expenses.main[App]))), acts*)
+// Cloudflare Workers (Scala.js, reference/cloudflare): each session a Durable Object, its pages and its API
+Cloudflare.serve(Door.html(expenses, pages), Door.rest(expenses))
+//   where expenses = OnFaces.program(steps(Ledger.inMemory(Nil)(Today.system(Expenses.main[App]))))
 ```
+
+ON CLOUDFLARE (`OnCloudflare`, okay-faces' `web/cloudflare`, its spec `specs/cloudflare.md` there): a deploying, not a
+change — the program is the same; okay-faces' HTML and REST faces serve it, each session a Durable Object. The ledger
+is the session's, in memory (`Door` makes the program again for each session), and it lasts as the session does: the
+session's journal of requests, played when the object wakes, adds the same expenses again. `reference/cloudflare/
+deploy.sh` (`wrangler dev`, or `deploy`), `e2e.js` (two expenses, the Worker started again, both there; another
+session has none). Not yet: a ledger shared by a person's sessions (a `Ledger` over the object's storage, its answers
+later), the date journaled.
 
 `App = Ui + Ledger + Today`. Read from the inside out: the program, `Today` handled, `Ledger` handled, `Ui` turned
 into steps, the steps driven by a toolkit.

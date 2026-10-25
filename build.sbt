@@ -135,6 +135,28 @@ lazy val reference = crossProject(platforms: _*).crossType(CrossType.Pure).in(fi
     jsdom,
     web := page("the expenses' page").value)
 
+/** EXPENSES ON CLOUDFLARE WORKERS: the same program, each session a Durable Object (okay-faces' `web/cloudflare`) —
+ * Scala.js alone: `sbt -Dplatforms=jvm,js referenceCloudflareJS/worker` links it beside the Worker's entry,
+ * `reference/cloudflare/deploy.sh` runs `wrangler dev` (or `deploy`) */
+val worker = taskKey[File]("the Worker: the script linked as an ES module, beside entry.js and wrangler.toml")
+lazy val referenceCloudflare = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("reference/cloudflare"))
+  .dependsOn(reference)
+  .settings(name := "okay-ui-reference-cloudflare", publish / skip := true,
+    libraryDependencies += "io.github.okay-effects" %%% "okay-faces-cloudflare" % okayFaces)
+  .whenJs(
+    Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-js",
+    scalaJSUseMainModuleInitializer := true,
+    Compile / mainClass := Some("okay.business.reference.OnCloudflare"),
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.ESModule)),
+    worker := {
+      val linked = (Compile / fullLinkJS).value.data.publicModules.head.jsFileName
+      val from = (Compile / fullLinkJS / scalaJSLinkerOutputDirectory).value / linked
+      val out = baseDirectory.value.getParentFile / "worker"
+      IO.copyFile(from, out / "main.js")
+      streams.value.log.info(s"the Worker: $out")
+      out
+    })
+
 /** THE DEFAULT: okay-scala's machine and okay-faces' faces — `"io.github.okay-effects" %% "okay-ui" % ...` */
 lazy val ui = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("ui"))
   .dependsOn(scala3Kernel, faces)
@@ -147,6 +169,7 @@ lazy val ui = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("ui"
       "io.github.okay-effects" %%% "okay-faces-dom" % okayFaces),
     jsdom)
 
-lazy val root = (project in file(".")).aggregate(Seq(core, scala3Kernel, simpleKernel, faces, ui, examples, reference)
+lazy val root = (project in file(".")).aggregate(Seq(core, scala3Kernel, simpleKernel, faces, ui, examples, reference,
+    referenceCloudflare)
   .flatMap(_.componentProjects).map(p => p: ProjectReference): _*)
   .settings(publish / skip := true)
