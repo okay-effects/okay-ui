@@ -2,7 +2,7 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val scala3 = "3.3.8"
-val okayScala = "0.1.0"
+val okayScala = "0.1.1"
 val okayEffects = "0.1.1"
 /** okay-simple's interface on okay-scala's machine, released with okay-simple */
 val okayEffectsCek = "0.1.1"

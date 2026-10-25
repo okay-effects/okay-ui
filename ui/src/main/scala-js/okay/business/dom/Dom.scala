@@ -7,6 +7,7 @@ import okay.effects.cek.OnCek
 import okay.faces.Face
 import okay.faces.dom.DomFace
 import okay.scala3.*
+import okay.scala3.std.{Lift, Lifted}
 import org.scalajs.dom
 import scala.concurrent.{Future, Promise}
 

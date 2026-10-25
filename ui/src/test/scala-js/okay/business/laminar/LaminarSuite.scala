@@ -3,6 +3,7 @@ package okay.business.laminar
 import okay.business.model.{Button, Field, Form, Part, Screen, Ui}
 import okay.business.scala3.{show, working}
 import okay.scala3.*
+import okay.scala3.std.{Lift, Lifted}
 import org.scalajs.dom
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue

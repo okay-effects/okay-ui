@@ -3,6 +3,7 @@ package okay.business.dom
 import okay.business.model.{Button, Events, Field, Form, Part, Screen, Style, Ui}
 import okay.business.scala3.show
 import okay.scala3.*
+import okay.scala3.std.{Lift, Lifted}
 import org.scalajs.dom
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue

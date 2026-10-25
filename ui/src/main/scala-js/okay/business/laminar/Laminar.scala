@@ -6,6 +6,7 @@ import okay.business.model.{Screen, Step, Ui}
 import okay.effects.cek.OnCek
 import okay.faces.laminar.LaminarFace
 import okay.scala3.*
+import okay.scala3.std.{Lift, Lifted}
 import org.scalajs.dom
 import scala.concurrent.{Future, Promise}
 

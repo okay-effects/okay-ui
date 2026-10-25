@@ -4,6 +4,7 @@ import okay.business.faces.Skin
 import okay.business.model.{Button, Screen, Ui}
 import okay.business.scala3.show
 import okay.scala3.*
+import okay.scala3.std.{Lift, Lifted}
 import org.scalajs.dom
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue

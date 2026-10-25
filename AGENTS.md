@@ -16,7 +16,7 @@ spec first.
 - Toolkits drive `Step`; `Play` (core) is the reference. `faces` maps a screen to okay-faces' `View` + `Action`s.
 - In an anonymous class implementing a handler, never name a pattern variable like the method it implements
   (`ret`, `op`, `answer`): the method calls itself, a tail call that loops forever (cost an hour, 2026-10-23).
-- Everything it depends on is released (okay-scala 0.1.0, okay-simple 0.1.1 with `okay-effects-cek`, okay-faces
+- Everything it depends on is released (okay-scala 0.1.1 — its effects in `okay.scala3.std`, okay-simple 0.1.1 with `okay-effects-cek`, okay-faces
   0.1.0), each from its GitHub Pages maven: the build needs no local copy. The faces run on okay-scala's machine
   through okay-simple's adapter `okay-effects-cek` (`import okay.effects.cek.OnCek.self`). Releasing: RELEASING.md.
 - Scala.js: `sbt -Dplatforms=jvm,js test` — every module, the shop's scripted tests shared, the page
