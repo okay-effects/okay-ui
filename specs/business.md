@@ -88,7 +88,8 @@ is still a screen, shown again; what is new is what may answer it and where its 
 - `Kind.LongText` is a text area (okay-faces' `Action.long`).
 
 In a page the screens of one program are ONE face (`Dom.run(root, skin)`, okay-faces' DOM face): a screen that
-follows another with the same buttons changes the page in place — what was typed stays, the focus, the scroll.
+follows another with the same buttons changes the page in place — what was typed stays, the focus, the scroll;
+`Dom.run(root, skin, follow = true)` keeps the end in view as a screen grows, when a person was at the end.
 
 ## The words
 

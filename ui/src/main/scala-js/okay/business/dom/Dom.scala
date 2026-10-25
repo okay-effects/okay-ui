@@ -14,15 +14,16 @@ import scala.concurrent.{Future, Promise}
  * `Ui` IN A PAGE BY OKAY-FACES' DOM FACE (specs/business.md, live screens): the handler of `Ui` into `Lifted[Future]`,
  * as `Laminar.run` is — `Lift.lower(Dom.run(root)(Fetch.run(App.main)))` — but the screens of the program are ONE face:
  * a screen that follows another with the same buttons changes the page in place, so a screen shown again on every
- * event (`screen.until(events)`) keeps what was typed, the focus, the scroll. The page wears `skin`.
+ * event (`screen.until(events)`) keeps what was typed, the focus, the scroll. The page wears `skin`; `follow`: a screen
+ * that grows keeps the page's end in view when a person was at it — a conversation, a log.
  */
 object Dom:
-  def run[R[_], Rest[_], A](root: dom.Element, skin: Skin = Skin.default)(p: A ! R)(
+  def run[R[_], Rest[_], A](root: dom.Element, skin: Skin = Skin.default, follow: Boolean = false)(p: A ! R)(
     using Split[Ui, R, Rest], In[Lifted[Future], Rest]): A ! Rest =
     defer {
       Page.install(skin)
       val face = new DomFace[OnCek.type]()(OnCek)
-      val session = face.session[Any](DomFace.Settings(look = Some(skin.look)))
+      val session = face.session[Any](DomFace.Settings(look = Some(skin.look), follow = follow))
       var mounted = false
       def draw[S](screen: Screen[S], answered: S => Unit): Unit =
         if !mounted then
