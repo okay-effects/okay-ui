@@ -48,7 +48,8 @@ object Skin:
       |  box-shadow: 0 1px 2px rgba(20, 24, 40, 0.12); color: #ffffff; }
       |body .okay-action:hover { filter: brightness(1.1); }
       |body .okay-action:active { transform: translateY(1px); }
-      |body .okay-action:focus-visible, body .okay-form input:focus, body .okay-form select:focus {
+      |body .okay-action:focus-visible, body .okay-form input:focus, body .okay-form select:focus,
+      |body .okay-form textarea:focus {
       |  outline: 3px solid color-mix(in srgb, var(--okay-accent) 30%, transparent); outline-offset: 1px; }
       |body .okay-action:is([data-action="back"], [data-action="cancel"], [data-action="ok"]) {
       |  background: var(--okay-surface); color: var(--okay-fg); border: 1px solid var(--okay-border); }
@@ -64,10 +65,13 @@ object Skin:
       |body .okay-field { align-items: stretch; gap: 6px; }
       |body .okay-label { font-size: 0.8em; color: var(--okay-muted); text-transform: uppercase;
       |  letter-spacing: 0.06em; }
-      |body .okay-form input, body .okay-form select { font: 16px/1.3 var(--okay-font); padding: 10px 12px; width: 100%;
+      |body .okay-form input, body .okay-form select, body .okay-form textarea { font: 16px/1.3 var(--okay-font);
+      |  padding: 10px 12px; width: 100%;
       |  box-sizing: border-box; border: 1px solid var(--okay-border); border-radius: 10px; background: var(--okay-bg);
       |  color: var(--okay-fg); }
-      |body .okay-form input:focus, body .okay-form select:focus { border-color: var(--okay-accent); }
+      |body .okay-form input:focus, body .okay-form select:focus, body .okay-form textarea:focus {
+      |  border-color: var(--okay-accent); }
+      |body .okay-form textarea { min-height: 88px; resize: vertical; }
       |body .okay-form > .okay-action { align-self: flex-start; min-width: 160px; }
       |/* the fields held back: Options, a row of its own at the end, its fields as the others when opened */
       |body .okay-form fieldset > .okay-more { grid-column: 1 / -1; }
