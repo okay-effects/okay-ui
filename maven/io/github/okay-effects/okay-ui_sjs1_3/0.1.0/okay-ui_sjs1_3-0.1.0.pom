@@ -60,6 +60,11 @@
             <artifactId>okay-faces-laminar_sjs1_3</artifactId>
             <version>0.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.okay-effects</groupId>
+            <artifactId>okay-faces-dom_sjs1_3</artifactId>
+            <version>0.1.0</version>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
