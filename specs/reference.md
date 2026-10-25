@@ -69,8 +69,10 @@ LaminarFace.mount(OnFaces.program(steps(Ledger.localStorage("expenses")(Today.sy
 okay.faces.run(Terminal.console(OnFaces.program(steps(Ledger.file(path)(Today.system(Expenses.main[App]))))))
 // a test
 Play(steps(Ledger.inMemory(Nil)(Today.fixed(day)(Expenses.main[App]))), acts*)
-// Cloudflare Workers (Scala.js, reference/cloudflare): each session a Durable Object, its pages and its API
-Cloudflare.serve(Door.html(expenses, pages), Door.rest(expenses))
+// Cloudflare Workers (Scala.js, reference/cloudflare): each session a Durable Object — the thin page, its pages, its
+// API, its tools for an agent
+Cloudflare.serve(Door.shell("Expenses", Cloudflare.asset("/index.js"), look),
+  Door.html(expenses, HtmlFace.Settings(look = look), atRoot = false), Door.rest(expenses), Door.mcp(expenses))
 //   where expenses = OnFaces.program(steps(Ledger.inMemory(Nil)(Today.system(Expenses.main[App]))))
 ```
 
@@ -78,8 +80,9 @@ ON CLOUDFLARE (`OnCloudflare`, okay-faces' `web/cloudflare`, its spec `specs/clo
 change — the program is the same; okay-faces' HTML and REST faces serve it, each session a Durable Object. The ledger
 is the session's, in memory (`Door` makes the program again for each session), and it lasts as the session does: the
 session's journal of requests, played when the object wakes, adds the same expenses again. `reference/cloudflare/
-deploy.sh` (`wrangler dev`, or `deploy`), `e2e.js` (two expenses, the Worker started again, both there; another
-session has none). Not yet: a ledger shared by a person's sessions (a `Ledger` over the object's storage, its answers
+deploy.sh` (`wrangler dev`, or `deploy`; the thin page okay-faces' DOM remote face alone, `reference/thin`, told by
+its session's socket when it moved), `e2e.js` (two expenses by the pages, one by an agent over MCP, the thin page
+following a move made elsewhere, the Worker started again: all there; another session has none). Not yet: a ledger shared by a person's sessions (a `Ledger` over the object's storage, its answers
 later), the date journaled.
 
 `App = Ui + Ledger + Today`. Read from the inside out: the program, `Today` handled, `Ledger` handled, `Ui` turned

@@ -51,6 +51,8 @@ lazy val simpleKernel = crossProject(platforms: _*).crossType(CrossType.Pure).in
 val okayFaces = "0.1.0"
 ThisBuild / resolvers += "okay-faces" at "https://okay-effects.github.io/okay-faces/maven"
 ThisBuild / resolvers += "okay-http" at "https://okay-effects.github.io/okay-http/maven"
+/** okay-mcp: okay-faces' MCP face, which its Cloudflare module serves */
+ThisBuild / resolvers += "okay-mcp" at "https://okay-effects.github.io/okay-mcp/maven"
 
 /** THE SCREENS ON OKAY-FACES: every face of it — terminal, HTML, Swing, Laminar, MCP — runs a business program; on
  * okay-scala's machine, through okay-simple's adapter: `import okay.effects.cek.OnCek.self` */
@@ -153,9 +155,19 @@ lazy val referenceCloudflare = crossProject(platforms: _*).crossType(CrossType.P
       val from = (Compile / fullLinkJS / scalaJSLinkerOutputDirectory).value / linked
       val out = baseDirectory.value.getParentFile / "worker"
       IO.copyFile(from, out / "main.js")
+      // the thin page's script, okay-faces' DOM remote face alone, as the Worker's entry takes it: text
+      val thin = (referenceThin.js / Compile / fullLinkJS).value.data.publicModules.head.jsFileName
+      IO.copyFile((referenceThin.js / Compile / fullLinkJS / scalaJSLinkerOutputDirectory).value / thin,
+        out / "page.js.txt")
       streams.value.log.info(s"the Worker: $out")
       out
     })
+/** THE THIN PAGE for Expenses on Cloudflare: okay-faces' DOM remote face alone (`okay.faces.dom.DomRemotePage`), no
+ * line of the application in it */
+lazy val referenceThin = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("reference/thin"))
+  .settings(name := "okay-ui-reference-thin", publish / skip := true)
+  .whenJs(libraryDependencies += "io.github.okay-effects" %%% "okay-faces-dom" % okayFaces,
+    scalaJSUseMainModuleInitializer := true, Compile / mainClass := Some("okay.faces.dom.DomRemotePage"))
 
 /** THE DEFAULT: okay-scala's machine and okay-faces' faces — `"io.github.okay-effects" %% "okay-ui" % ...` */
 lazy val ui = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("ui"))
@@ -170,6 +182,6 @@ lazy val ui = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("ui"
     jsdom)
 
 lazy val root = (project in file(".")).aggregate(Seq(core, scala3Kernel, simpleKernel, faces, ui, examples, reference,
-    referenceCloudflare)
+    referenceCloudflare, referenceThin)
   .flatMap(_.componentProjects).map(p => p: ProjectReference): _*)
   .settings(publish / skip := true)
