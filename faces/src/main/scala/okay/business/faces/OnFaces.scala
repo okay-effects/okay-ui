@@ -99,7 +99,10 @@ object OnFaces:
     }
     // the buttons at slots: refs, chosen by their keys
     val keys = at.map((_, key, i) => key -> i).toMap
-    val key = Shape.Field[String]("key", Shape.choice(keys.keys.toList.sorted.map(k => k -> k)*), Some("Button"))
+    // the key a text, checked here: the action the same however many buttons stand at slots — so a face may keep the
+    // page when a screen follows with more (okay-faces: the same actions, the view changed in place)
+    val key = Shape.Field[String]("key", Shape.text.refine(k =>
+      if keys.contains(k) then Right(k) else Left(s"no button $k here"))(identity), Some("Button"))
     val ref = Option.when(at.nonEmpty)(Action[String, Answer]("ref", "Press",
       Shape.fields[String](List(key))(vs => vs.head.asInstanceOf[String])(k => List(k)))(k => Answer(keys(k))))
     bar ++ ref.toList
