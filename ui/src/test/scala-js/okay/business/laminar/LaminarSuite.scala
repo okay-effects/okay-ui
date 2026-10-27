@@ -1,7 +1,7 @@
 package okay.business.laminar
 
 import okay.business.model.{Button, Field, Form, Part, Screen, Ui}
-import okay.business.scala3.{show, working}
+import okay.business.scala3.{interruptible, show, working}
 import okay.scala3.*
 import okay.scala3.std.{Async, Cancelled, Lift, Lifted}
 import org.scalajs.dom
@@ -75,6 +75,68 @@ class LaminarSuite extends munit.FunSuite:
       assert(e.isInstanceOf[Cancelled], e.toString)
       // the face's own form took the press; the program's next screen never came
       assert(!root.textContent.contains("asking for"), root.innerHTML)
+
+  /** a wait the test sees started and cancelled: a `fetch` would be aborted there */
+  final class Wait:
+    var started = 0
+    var cancelled = 0
+    val answer = Promise[Int]()
+    def program[R[_]](using In[Async, R]): Int ! R = Async.cancellable[Int, R] { cb =>
+      started += 1
+      answer.future.foreach(n => cb(Right(n)))
+      () => cancelled += 1
+    }
+
+  /** a block of work with a way out, twice: the second runs whatever the first did */
+  def leaving(first: Wait, second: Wait): String ! Paged =
+    def once(w: Wait): Either[String, Int] ! Paged =
+      interruptible[String, Int, Paged](Button("Stop")("stopped"))(
+        working[Paged]("Working")(Part.text("waiting")).andThen(w.program[Paged]))
+    for
+      a <- once(first)
+      _ <- show[Unit, Paged](Screen[Unit]("Between")(Part.text(s"$a"))(Button("Again")(())))
+      b <- once(second)
+      done <- show[String, Paged](Screen[String]("End")(Part.text(s"$b"))(Button("OK")(s"$a $b")))
+    yield done
+
+  test("an exit pressed while the program waits: the wait cancelled, the program on after the block with Left"):
+    val root = fresh()
+    val (first, second) = (Wait(), Wait())
+    val result = Async.toFuture(Laminar.run(root)(leaving(first, second)))
+    for
+      _ <- settled
+      _ = assertEquals((q("h1").textContent, first.started, first.cancelled), ("Working", 1, 0))
+      _ = q("button[data-action=stop]").click()
+      _ <- settled
+      _ = assertEquals((q("h1").textContent, first.cancelled), ("Between", 1))
+      _ = assert(root.textContent.contains("Left(stopped)"), root.innerHTML)
+      // the first wait's late answer goes nowhere
+      _ = first.answer.success(1)
+      _ = q("button[data-action=again]").click()
+      _ <- settled
+      _ = assertEquals((q("h1").textContent, second.started), ("Working", 1))
+      _ = second.answer.success(7)
+      _ <- settled
+      _ = assertEquals(q("h1").textContent, "End")
+      _ = assert(root.textContent.contains("Right(7)"), root.innerHTML)
+      _ = assertEquals(second.cancelled, 0)
+      _ = q("button[data-action=ok]").click()
+      done <- result
+    yield assertEquals(done, "Left(stopped) Right(7)")
+
+  test("an exit on a screen no longer shown is not taken"):
+    val root = fresh()
+    val (first, second) = (Wait(), Wait())
+    val _ = Async.toFuture(Laminar.run(root)(leaving(first, second)))
+    for
+      _ <- settled
+      stale = q("button[data-action=stop]")
+      _ = first.answer.success(3)
+      _ <- settled
+      _ = assertEquals(q("h1").textContent, "Between")
+      _ = stale.click()
+      _ <- settled
+    yield assertEquals((q("h1").textContent, first.cancelled), ("Between", 0))
 
   test("deprecated, Lifted[Future]: the same page, lowered by Lift.lower"):
     val root = fresh()

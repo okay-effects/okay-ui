@@ -384,6 +384,12 @@ object model:
     /** THE PROGRAM AT A POINT IT CAN BE TAKEN UP FROM: its name, its state as data (JSON text) — a host that loses its
      * memory keeps it instead of the way there, and starts the program there again; a toolkit goes on */
     case Mark(point: String, state: String) extends Ui[Unit]
+    /** AN INTERRUPTIBLE BLOCK BEGUN: until its `Settled`, every working screen shows `exits` (buttons of no input).
+     * Answered `None` at once; the same point resumed with `Some(e)` when the person presses an exit: the block
+     * left */
+    case Exits[E](exits: List[Button[E]]) extends Ui[Option[E]]
+    /** the innermost interruptible block ended: its exits gone */
+    case Settled() extends Ui[Unit]
 
   /** A PROGRAM OF `Ui`, IN STEPS — of no kernel: what every toolkit drives. `resume` runs the rest of the program up
    * to its next screen; resuming an older `Waiting` again goes back to it */
@@ -394,6 +400,25 @@ object model:
     case Working(screen: Screen[Nothing], next: () => Step[A])
     /** a point passed (`Ui.Mark`); `next()` the rest */
     case Marked(point: String, state: String, next: () => Step[A])
+    /** A WORKING SCREEN WITH A WAY OUT, in an interruptible block: its buttons the exits, answering their number;
+     * `next()` goes on, `leave(i)` is the program after the block whose exit `i` was pressed */
+    case Leavable(screen: Screen[Int], next: () => Step[A], leave: Int => Step[A])
+
+  /** AN INTERRUPTIBLE BLOCK THE PROGRAM IS IN: its exits, and the program after it for each — `P` a step, or a page's
+   * program (`okay.business.laminar`) */
+  final class Exiting[P] private (val labels: List[(String, Style)], val leave: Int => P)
+
+  object Exiting:
+    def apply[P, E](exits: List[Button[E]], after: E => P): Exiting[P] =
+      val screen = Screen[E]("", Nil, exits)
+      new Exiting[P](exits.map(b => (b.label, b.style)),
+        i => after(screen.press(Answer(i)).fold(ps => throw IllegalArgumentException(ps.mkString("; ")), identity)))
+
+    /** the exits of every block, the innermost first, as buttons answering their number; and where each leads */
+    def offered[P](in: List[Exiting[P]]): (List[Button[Int]], Int => P) =
+      val all = in.flatMap(b => b.labels.indices.map(j => (b.labels(j), b, j)))
+      (all.zipWithIndex.map { case (((label, style), _, _), i) => Button[Int](label, style)(i) },
+        i => { val (_, b, j) = all(i); b.leave(j) })
 
   extension [A, S](w: Step.Waiting[A, S])
     /** a toolkit's answer: the next step, or the problems to show on this one */
@@ -405,10 +430,13 @@ object model:
    * its cells' text */
   enum Act:
     case Press(button: String, entries: List[(String, String)], row: Option[String])
+    /** an exit pressed on the next working screen that has it: the block left */
+    case Leave(button: String)
 
   object Act:
     def press(button: String, entries: (String, String)*): Act = Press(button, entries.toList, None)
     def choose(button: String, row: String, entries: (String, String)*): Act = Press(button, entries.toList, Some(row))
+    def leave(button: String): Act = Leave(button)
 
   /** how a play went: the result if the program ended, the titles seen, the problems of the last act, the screen it
    * stopped at */
@@ -422,6 +450,11 @@ object model:
         case Step.Done(a) => Played(Some(a), seen.reverse, Nil, None)
         case Step.Working(screen, next) => go(next(), acts, screen.title :: seen)
         case Step.Marked(_, _, next) => go(next(), acts, seen)
+        // the script's next act an exit of this screen: pressed; any other, the work goes on
+        case Step.Leavable(screen, next, leave) => acts match
+          case Act.Leave(label) :: rest if screen.buttons.exists(_.label == label) =>
+            go(leave(screen.buttons.indexWhere(_.label == label)), rest, screen.title :: seen)
+          case _ => go(next(), acts, screen.title :: seen)
         case w: Step.Waiting[A, s] =>
           val shown = w.screen.title :: seen
           acts match
@@ -432,6 +465,8 @@ object model:
       go(first, acts.toList, Nil)
 
     private def answerOf(screen: Screen[?], act: Act): Answer = act match
+      case Act.Leave(label) =>
+        throw IllegalArgumentException(s"no working screen to leave by '$label' before '${screen.title}'")
       case Act.Press(label, entries, row) =>
         val button = screen.buttons.indexWhere(_.label == label)
         require(button >= 0, s"no button '$label' on '${screen.title}': ${screen.buttons.map(_.label).mkString(", ")}")

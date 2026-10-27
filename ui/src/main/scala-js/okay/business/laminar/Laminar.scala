@@ -35,12 +35,5 @@ object Laminar:
           render(root, div(cls := "okay-ui", child <-- shown.signal))
           mounted = true
         shown.set(face.handle(OnFaces.program(Step.Waiting[S, S](screen, s => Step.Done(s))), settings, answered))
-      handle(p, Handler.general[Ui, Rest, A, A](pure)([X] => (op: Ui[X], k: X => A ! Rest) => op match
-        case Ui.Show(screen) =>
-          later[X](answer => draw[X](screen, answer)).flatMap(k)
-        case Ui.Working(screen) =>
-          draw[Nothing](screen, _ => ())
-          k(())
-        // a point passed: a page keeps nothing of it
-        case Ui.Mark(_, _) => k(())))
+      PageUi.handled(p, [S] => (screen: Screen[S], answered: S => Unit) => draw[S](screen, answered))
     }

@@ -1,7 +1,7 @@
 package okay.business.dom
 
 import okay.business.faces.{OnFaces, Skin}
-import okay.business.laminar.{Later, Page}
+import okay.business.laminar.{Later, Page, PageUi}
 import okay.business.model.{Screen, Step, Ui}
 import okay.effects.cek.OnCek
 import okay.faces.Face
@@ -37,12 +37,5 @@ object Dom:
         val program = OnFaces.program(Step.Waiting[S, S](screen, s => Step.Done(s)))
           .asInstanceOf[okay.effects.tagless.Program[Any, Face]]
         session.show(face.faces.steps[Any, Face, OnCek.Pure](face.faces.of(program)), a => answered(a.asInstanceOf[S]))
-      handle(p, Handler.general[Ui, Rest, A, A](pure)([X] => (op: Ui[X], k: X => A ! Rest) => op match
-        case Ui.Show(screen) =>
-          later[X](answer => draw[X](screen, answer)).flatMap(k)
-        case Ui.Working(screen) =>
-          draw[Nothing](screen, _ => ())
-          k(())
-        // a point passed: a page keeps nothing of it
-        case Ui.Mark(_, _) => k(())))
+      PageUi.handled(p, [S] => (screen: Screen[S], answered: S => Unit) => draw[S](screen, answered))
     }

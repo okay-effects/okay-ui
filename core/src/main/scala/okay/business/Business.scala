@@ -15,6 +15,15 @@ trait Business extends Kernel:
   def working[R[_]](title: String)(parts: Part*)(using In[Ui, R]): Unit ! R =
     perform[Ui](Ui.Working(Screen[Nothing](title, parts.toList, Nil)))
 
+  /** A WAY OUT OF WORK: while `block` runs, every working screen shows `exits` (buttons of no input); `Right` of its
+   * value when it ends, `Left(e)` when the person presses an exit — the block left where it is (in a page its wait
+   * cancelled), the program going on here (specs/business.md, level 3) */
+  def interruptible[E, A, R[_]](exits: Button[E]*)(block: => A ! R)(using In[Ui, R]): Either[E, A] ! R =
+    perform[Ui](Ui.Exits(exits.toList)).flatMap {
+      case None => block.flatMap(a => perform[Ui](Ui.Settled()).map(_ => Right(a)))
+      case Some(e) => pure(Left(e))
+    }
+
   /** THE PROGRAM AT A POINT IT CAN BE TAKEN UP FROM, its state as JSON text: a host that loses its memory keeps it,
    * and starts the program there again (okay-faces' points, `Durable`) */
   def mark[R[_]](point: String, state: String)(using In[Ui, R]): Unit ! R = perform[Ui](Ui.Mark(point, state))
@@ -40,11 +49,20 @@ trait Business extends Kernel:
     show(Screen[A](title)()(options.map((label, a) => Button(label)(a))*))
 
   /** THE STANDARD HANDLER: a program of `Ui` in steps, of no kernel — what every toolkit drives. `k` kept in each
-   * `Waiting`, so a toolkit may resume an older one again: back; a `Working` goes on when the toolkit runs `next` */
+   * `Waiting`, so a toolkit may resume an older one again: back; a `Working` goes on when the toolkit runs `next`. The
+   * interruptible blocks the program is in passed along, not kept: a step resumed again has the blocks of its time */
   def steps[A](p: A ! Ui): Step[A] =
-    run(handle[Ui, Ui, Pure, A, Step[A]](p, Handler.General[Ui, Pure, A, Step[A]](a => pure(Step.Done(a)),
-      [X] => (op: Ui[X], k: X => Step[A] ! Pure) => op match
-        case Ui.Show(screen) => pure[Step[A], Pure](Step.Waiting(screen, (x: X) => run(k(x))))
-        case Ui.Working(screen) => pure[Step[A], Pure](Step.Working(screen, () => run(k(()))))
-        case Ui.Mark(point, state) => pure[Step[A], Pure](Step.Marked(point, state, () => run(k(()))))))(
-      using only[Ui]))
+    type Go = List[Exiting[Step[A]]] => Step[A]
+    run(handle[Ui, Ui, Pure, A, Go](p, Handler.General[Ui, Pure, A, Go](a => pure(_ => Step.Done(a)),
+      [X] => (op: Ui[X], k: X => Go ! Pure) => op match
+        case Ui.Show(screen) => pure[Go, Pure](in => Step.Waiting(screen, (x: X) => run(k(x))(in)))
+        case Ui.Working(screen) => pure[Go, Pure](in =>
+          if in.isEmpty then Step.Working(screen, () => run(k(()))(in))
+          else
+            val (buttons, leave) = Exiting.offered(in)
+            Step.Leavable(Screen[Int](screen.title, screen.parts, buttons), () => run(k(()))(in), leave))
+        case Ui.Mark(point, state) => pure[Go, Pure](in => Step.Marked(point, state, () => run(k(()))(in)))
+        case x: Ui.Exits[e] => pure[Go, Pure](in =>
+          run(k(None))(Exiting[Step[A], e](x.exits, ev => run(k(Some(ev)))(in)) :: in))
+        case Ui.Settled() => pure[Go, Pure](in => run(k(()))(in.drop(1)))))(
+      using only[Ui]))(Nil)

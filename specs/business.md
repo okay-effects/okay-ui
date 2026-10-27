@@ -25,10 +25,29 @@ chosen by ONE import.
 3. **The effect `Ui`**: two operations. `Show(screen): A` — the screen shown, the result of the button pressed.
    `Working(screen): Unit` — a screen shown WHILE THE PROGRAM GOES ON, answered at once, no button: progress, "3 of
    at most 60 addresses read"; the next screen, of either kind, takes its place.
+
+   **A WAY OUT OF WORK (2026-10-27):** `interruptible(exits*)(block): Either[E, A]` — while `block` runs, every working
+   screen shows `exits`, buttons of no input (`Button(label)(e)`); the block's value is `Right(a)` when it ends, and
+   `Left(e)` when the person presses an exit: the block is left where it is — in the page its current wait cancelled
+   (a `fetch` aborted, a timer cleared) — and the program goes on AFTER THE BLOCK with `Left(e)`, as if a `show` there
+   had answered it. Two operations make it: `Exits(buttons): Option[E]`, answered `None` at once, and the same point
+   resumed with `Some(e)` when an exit is pressed (a multi-shot `k`, kept); `Settled(): Unit`, the block's end, after
+   which its exits are gone. Blocks nest: a working screen shows the exits of every block it is in, the innermost
+   first, and pressing one leaves its own block. Exits are on working screens only: a `show` inside the block waits for
+   its own buttons. `working` itself is unchanged: a working screen in no block has no button.
+
+   WHY A BLOCK, not buttons on each working screen: progress is often drawn by a HANDLER (Coinpath's `Progress.toUi`,
+   `Seen` into `Ui`) that cannot know where the program should go when the person leaves, nor jump there; the program
+   says it once, around the work, and every working screen of that work — the program's own or a handler's — offers
+   the way out. And the place it goes on from, the block's end, is a point the program names and handles
+   (`case Left(another) => form`), not some point inside work half done.
 4. **Steps**: the standard handler turns `A ! Ui` into `Step[A]` — `Done(a)`, `Waiting(screen, resume)` or
    `Working(screen, next)` — plain Scala, of no kernel. `resume` holds the program's continuation: resuming an older
    `Waiting` again is BACK (on a kernel with multi-shot continuations: all three above). `next` is the rest after a
    working screen, run when the toolkit has shown it.
+   Inside an `interruptible` block a working screen is `Leavable(screen, next, leave)`: the screen's buttons are the
+   exits (answering their number), `next()` goes on, `leave(i)` is the program after the block of exit `i`. A toolkit
+   that cannot interrupt (a terminal, okay-faces' faces) goes on as at a `Working`.
 5. **Toolkits**: anything that drives `Step`s. In this repository: `Play` (a test script, in core) and the
    okay-faces handler (module `faces`), which turns steps into a program of okay-faces' `Face` — so every okay-faces
    face (terminal, HTML, Swing, Laminar, MCP) runs a business application unchanged. That program of `Face` runs on
@@ -44,7 +63,14 @@ chosen by ONE import.
    screen and goes on at once. The program's other handlers answer later the same way (`Async.cancellable`,
    `Async.sleep`, `Async.fromFuture` for a library's `Future`), and one run at the top drives it all:
    `Async.toFuture(Laminar.run(root)(Fetch.run(App.main)))`, or `Async.start(...)`, whose `Running` cancels it.
-   In a test the same program is `steps` and `Play`.
+   A working screen in an `interruptible` block shows its exits; pressed, THE CURRENT WAIT IS CANCELLED — the
+   operation's own cancel (`Async.cancellable`'s), so a `fetch` is aborted and a timer cleared — and the program goes
+   on at the block's end with `Left(e)`; pressed while it is not waiting (it cannot be, in a page, between two of its
+   steps), at its next wait. The handlers do it by intercepting `Async` around the program once, so each wait can be
+   raced with the exit; the interception stays one deep however often a person leaves. With the deprecated
+   `Lifted[Future]` a future cannot be cancelled: no exit is shown.
+   In a test the same program is `steps` and `Play`: `Act.leave(label)` presses an exit on the next working screen
+   that has it, and the script goes on from the block's end; any other act lets working screens go on.
 
    WHY ONE ASYNC EFFECT: any number of sources that answer later — fetches, timers, callbacks, a library's futures —
    are operations of one effect, with no terminal monad, so nothing has to be last; data monads (`Option`, `Either`,

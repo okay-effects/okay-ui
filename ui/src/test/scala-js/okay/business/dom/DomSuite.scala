@@ -1,7 +1,7 @@
 package okay.business.dom
 
 import okay.business.model.{Button, Events, Field, Form, Part, Screen, Style, Ui}
-import okay.business.scala3.show
+import okay.business.scala3.{interruptible, show, working}
 import okay.scala3.*
 import okay.scala3.std.{Async, Lift, Lifted}
 import org.scalajs.dom
@@ -102,3 +102,21 @@ class DomSuite extends munit.FunSuite:
       _ = q(".okay-mark-card a.okay-ref").click()
       done <- result
     yield assertEquals(done, "approved at 2")
+
+  test("an exit pressed while the program waits: the wait cancelled, the program on after the block"):
+    val root = fresh()
+    var cancelled = false
+    val waiting: Int ! Page = Async.cancellable[Int, Page](_ => () => cancelled = true)
+    val p: String ! Page =
+      interruptible[String, Int, Page](Button("Stop")("stopped"))(working[Page]("Working")().andThen(waiting))
+        .flatMap(out => show[String, Page](Screen[String]("After")(Part.text(s"$out"))(Button("OK")(s"$out"))))
+    val result = Async.toFuture(Dom.run(root)(p))
+    for
+      _ <- settled
+      _ = assertEquals(q("h1").textContent, "Working")
+      _ = q("button[data-action=stop]").click()
+      _ <- settled
+      _ = assertEquals((q("h1").textContent, cancelled), ("After", true))
+      _ = q("button[data-action=ok]").click()
+      done <- result
+    yield assertEquals(done, "Left(stopped)")

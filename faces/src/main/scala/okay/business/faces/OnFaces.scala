@@ -21,6 +21,9 @@ object OnFaces:
     // shown, and on at once: a face tells it and runs the rest
     case Step.Working(screen, next) =>
       okay.faces.flatMap(okay.faces.show[Face](view(screen, Nil)))(_ => program(next()))
+    // a working screen with a way out: okay-faces' faces run the rest at once, no exit can be pressed meanwhile
+    case Step.Leavable(screen, next, _) =>
+      okay.faces.flatMap(okay.faces.show[Face](view(screen.copy(buttons = Nil), Nil)))(_ => program(next()))
     // a point passed: okay-faces' own, its state the JSON the program gave
     case Step.Marked(point, state, next) =>
       okay.faces.flatMap(okay.faces.mark[Face](point,
