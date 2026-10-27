@@ -35,13 +35,26 @@ chosen by ONE import.
    okay-scala's machine too: okay-faces is written over okay-simple's interface, and okay-simple's adapter
    `okay-effects-cek` (`OnCek`) is that interface on okay-scala's CEK machine — `import okay.effects.cek.OnCek.self`.
    okay-simple's own machine is not needed, only its interface and the libraries okay-faces is made of.
-6. **A program whose world answers LATER** — a browser's `fetch`, its storage, the person's click — is not driven by
-   steps: in a page every answer comes back as a `Future`, and the screen is one of those answers. The browser's
-   handler of `Ui` on okay-scala's machine, `Laminar.run(root)` (module `ui`, Scala.js), takes `Ui` into okay-scala's
-   `Lifted[Future]`: `Show` draws the screen by okay-faces' Laminar face into `root` and is answered by the button
-   pressed, a `Future`; `Working` draws its screen and goes on at once. The program's other handlers lift their own
-   futures the same way, and `Lift.lower` at the top makes one `Future` of it all:
-   `Lift.lower(Laminar.run(root)(Fetch.run(App.main)))`. In a test the same program is `steps` and `Play`.
+6. **A program whose world answers LATER** — a browser's `fetch`, its timers, its storage, the person's click — is not
+   driven by steps: in a page its answers come back later, and the screen is one of them. Asynchrony is an EFFECT,
+   okay-scala's `Async`, driven by its own loop (`Async.toFuture`, `Async.start`), as okay-core does it — not a base
+   monad at the end of the row. The browser's handlers of `Ui` on okay-scala's machine, `Laminar.run(root)` and
+   `Dom.run(root)` (module `ui`, Scala.js), take `Ui` into a row with `Async` in it: `Show` draws the screen by
+   okay-faces' face into `root` and is answered by the button pressed, `Async.async(cb => ...)`; `Working` draws its
+   screen and goes on at once. The program's other handlers answer later the same way (`Async.cancellable`,
+   `Async.sleep`, `Async.fromFuture` for a library's `Future`), and one run at the top drives it all:
+   `Async.toFuture(Laminar.run(root)(Fetch.run(App.main)))`, or `Async.start(...)`, whose `Running` cancels it.
+   In a test the same program is `steps` and `Play`.
+
+   WHY ONE ASYNC EFFECT: any number of sources that answer later — fetches, timers, callbacks, a library's futures —
+   are operations of one effect, with no terminal monad, so nothing has to be last; data monads (`Option`, `Either`,
+   `List`) are handled where they stand, `Lift.handle`; and cancellation comes with it: a run cancelled cancels the
+   operation it waits on — a `fetch` aborted, a timer cleared.
+
+   The way before, `Ui` into okay-scala's `Lifted[Future]`, lowered once at the top
+   (`Lift.lower(Laminar.run(root)(...))`), still compiles and runs, for one release: DEPRECATED. The handlers wait by
+   a `Later[Rest]` — `Async` when the row has it, else a `Lifted[Future]` — so a program of either row is taken, the
+   one way chosen by its row, nothing said.
 
 ## The model
 

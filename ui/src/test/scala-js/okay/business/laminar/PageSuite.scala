@@ -4,9 +4,8 @@ import okay.business.faces.Skin
 import okay.business.model.{Button, Screen, Ui}
 import okay.business.scala3.show
 import okay.scala3.*
-import okay.scala3.std.{Lift, Lifted}
+import okay.scala3.std.Async
 import org.scalajs.dom
-import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 /** A PAGE'S LOOK, under jsdom: the default skin with nothing said, one `<style>` however often a skin is installed */
@@ -26,6 +25,6 @@ class PageSuite extends munit.FunSuite:
     dom.document.body.innerHTML = ""
     val root = dom.document.createElement("div")
     dom.document.body.appendChild(root)
-    type Page_[X] = (Lifted[Future] + Ui)[X]
-    Lift.lower(Laminar.run(root)(show[Unit, Page_](Screen[Unit]("Hello")()(Button("OK")(())))))
+    type Page_[X] = (Async + Ui)[X]
+    Async.start(Laminar.run(root)(show[Unit, Page_](Screen[Unit]("Hello")()(Button("OK")(()))))).cancel()
     assertEquals(skins.map(_.textContent), List(Skin.default.css))

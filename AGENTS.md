@@ -23,8 +23,9 @@ spec first.
   (`ShopPageSuite`) under jsdom from `NODE_PATH` (default /opt/homebrew/lib/node_modules). `examplesJS/web` links the
   shop's page into `examples/.js/target/web`. okay-faces 0.1.0 as republished on 2026-10-23: a rejected form keeps
   what was typed (the first 0.1.0 drew it again empty) — a stale Coursier cache of okay-faces gives the old jars.
-- `ui` with Scala.js has `Laminar.run(root)`: `Ui` into okay-scala's `Lifted[Future]`,
-  for programs whose world answers later (Coinpath's fetches); its test under jsdom.
+- `ui` with Scala.js has `Laminar.run(root)` and `Dom.run(root)`: `Ui` into okay-scala's `Async` (an effect, driven by
+  `Async.toFuture` / `Async.start`), for programs whose world answers later (Coinpath's fetches); a row of
+  `Lifted[Future]` instead is still taken, deprecated (spec, level 6); tests of both under jsdom.
 - A page's look is okay-ui's, built in (spec, "How a page looks"): `Skin` in `faces` (okay-faces' `Look` plus a
   stylesheet over its classes), `Skin.default` = `calm()`, `Skin.plain`; in a page `Page.mount` / `Laminar.run(root)`
   install it with nothing said. A page's `index.html` writes only its frame (header, `#app`, footer), never a style.
