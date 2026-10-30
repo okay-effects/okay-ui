@@ -36,5 +36,6 @@ object Laminar:
           mounted = true
         shown.set(face.handle(OnFaces.program(Step.Waiting[S, S](screen, s => Step.Done(s))), settings, answered))
         FilePicking.attachSoon(root, screen)
+        okay.business.laminar.TreeToggling.attachSoon(root)
       PageUi.handled(p, [S] => (screen: Screen[S], answered: S => Unit) => draw[S](screen, answered))
     }

@@ -234,3 +234,12 @@ untouched: the chooser is added after the face has drawn (`OnFaces.files(screen)
 `Clipboard` (in the model): `copy(text)` answers whether the text was copied. Handlers: `copiedTo(buffer)` (a test's),
 `InThePage.clipboard` (the browser's `navigator.clipboard`; `false` where the page may not write it).
 
+## A tree (2026-10-30)
+
+`Part.tree(title, nodes*)` with `Part.TreeNode(key, label, open, current, children)`: a tree to open and close — a
+program's terms in a debugger. `OnFaces` lowers it onto okay-faces' views (marks `tree-node`/`tree-node-open`,
+`-current`, `tree-key-<key>`, `tree-label`/`tree-leaf`, `tree-children`): a face of text prints it nested; the skin
+hides a closed node's children; in a page `TreeToggling` (after `Laminar.run` / `Dom.run` draw) opens and closes a node
+by a click on its label and keeps the person's choices by key while the page lives, so the next screen's tree is as
+they left it.
+

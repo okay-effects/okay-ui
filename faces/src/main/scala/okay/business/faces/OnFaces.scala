@@ -87,6 +87,16 @@ object OnFaces:
     // skin keeps their spaces and sets them in its monospace, a face of text shows them as they are
     case Part.Code(lines, current, title) => List(View.Marked("code", View.Group(title, lines.zipWithIndex.map((l, i) =>
         View.Marked(if current(i) then "code-line-current" else "code-line", View.Text(l))).toVector)))
+    // A TREE: each node under the mark `tree-node` (`tree-node-open`, `-current` added), its key a mark of its own
+    // (`tree-key-<key>`) a page reads to keep what was opened; its label, then its children under `tree-children`
+    case Part.Tree(title, roots) =>
+      def node(n: Part.TreeNode): View =
+        val state = (if n.open then "tree-node-open" else "tree-node") + (if n.current then "-current" else "")
+        val label = View.Marked(if n.children.isEmpty then "tree-leaf" else "tree-label", View.Text(n.label))
+        View.Marked(state, View.Marked(s"tree-key-${n.key}", View.Group(None,
+          if n.children.isEmpty then Vector(label)
+          else Vector(label, View.Marked("tree-children", View.Group(None, n.children.map(node).toVector))))))
+      List(View.Marked("tree", View.Group(title, roots.map(node).toVector)))
     case Part.Link(label, url) => List(View.Link(label, url))
     case Part.Qr(text, alt) => List(View.qr(text, alt))
     // A PICTURE, as data on both sides: okay-faces' View.Picture

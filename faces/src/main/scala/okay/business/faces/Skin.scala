@@ -113,6 +113,27 @@ object Skin:
       |body .okay-mark-button-primary > .okay-mark-button > .okay-ref { background: var(--okay-accent);
       |  border-color: var(--okay-accent); color: #ffffff; }
       |body .okay-mark-button-danger > .okay-mark-button > .okay-ref { color: var(--okay-problem); }
+      |/* a tree (Part.tree): nodes open and close by a click on their label; closed, their children hidden */
+      |body .okay-mark-tree { display: block; }
+      |body .okay-mark-tree > .okay-group { font-family: var(--okay-mono); font-size: 0.85em; line-height: 1.5;
+      |  background: var(--okay-surface); border: 1px solid var(--okay-border); border-radius: 10px;
+      |  padding: 10px 14px; overflow-x: auto; }
+      |body .okay-mark-tree .okay-mark, body .okay-mark-tree .okay-group { display: block; margin: 0; padding: 0;
+      |  border: 0; background: none; box-shadow: none; }
+      |body .okay-mark-tree .okay-text { margin: 0; white-space: pre; font-family: inherit; }
+      |body .okay-mark-tree-children { padding-left: 1.4em !important; border-left: 1px dotted var(--okay-border); }
+      |body .okay-mark-tree-node > .okay-mark > .okay-group > .okay-mark-tree-children,
+      |body .okay-mark-tree-node-current > .okay-mark > .okay-group > .okay-mark-tree-children { display: none; }
+      |body .okay-mark-tree-label > .okay-text { cursor: pointer; }
+      |body .okay-mark-tree-label > .okay-text::before { content: "▸ "; color: var(--okay-muted); }
+      |body .okay-mark-tree-node-open > .okay-mark > .okay-group > .okay-mark-tree-label > .okay-text::before,
+      |body .okay-mark-tree-node-open-current > .okay-mark > .okay-group > .okay-mark-tree-label > .okay-text::before {
+      |  content: "▾ "; }
+      |body .okay-mark-tree-leaf > .okay-text::before { content: "  "; }
+      |body .okay-mark-tree-node-current > .okay-mark > .okay-group > .okay-mark > .okay-text,
+      |body .okay-mark-tree-node-open-current > .okay-mark > .okay-group > .okay-mark > .okay-text {
+      |  background: color-mix(in srgb, var(--okay-accent) 16%, transparent);
+      |  box-shadow: inset 3px 0 0 var(--okay-accent); }
       |/* a file field (Field.file): its chooser under the text area, the area a drop target */
       |body label.okay-file { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px;
       |  color: var(--okay-accent); font-weight: 600; cursor: pointer; }

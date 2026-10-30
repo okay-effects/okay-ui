@@ -201,6 +201,13 @@ object model:
     def code(text: String, current: Int*): Part = Code(text.split("\n", -1).toList, current.toSet, None)
     def code(title: String, lines: List[String], current: Set[Int]): Part =
       Code(lines, current, Option(title).filter(_.nonEmpty))
+    /** A TREE TO OPEN AND CLOSE — a program's terms, a document's parts: each node its label, its key (the same node
+     * keeps it from screen to screen), whether it starts open, whether it is the current one, its children; a page
+     * opens and closes a node by a click and keeps what the person opened while the tree is shown again */
+    final case class Tree(title: Option[String], roots: List[TreeNode]) extends Part
+    final case class TreeNode(key: String, label: String, open: Boolean = false, current: Boolean = false,
+      children: List[TreeNode] = Nil)
+    def tree(title: String, roots: TreeNode*): Part = Tree(Option(title).filter(_.nonEmpty), roots.toList)
     /** where the screen's buttons `at(name)` stand */
     final case class Slot(name: String) extends Part
     def slot(name: String): Part = Slot(name)

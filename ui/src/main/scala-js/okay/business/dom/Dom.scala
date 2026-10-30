@@ -38,5 +38,6 @@ object Dom:
           .asInstanceOf[okay.effects.tagless.Program[Any, Face]]
         session.show(face.faces.steps[Any, Face, OnCek.Pure](face.faces.of(program)), a => answered(a.asInstanceOf[S]))
         okay.business.laminar.FilePicking.attachSoon(root, screen)
+        okay.business.laminar.TreeToggling.attachSoon(root)
       PageUi.handled(p, [S] => (screen: Screen[S], answered: S => Unit) => draw[S](screen, answered))
     }
