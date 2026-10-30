@@ -113,6 +113,10 @@ object Skin:
       |body .okay-mark-button-primary > .okay-mark-button > .okay-ref { background: var(--okay-accent);
       |  border-color: var(--okay-accent); color: #ffffff; }
       |body .okay-mark-button-danger > .okay-mark-button > .okay-ref { color: var(--okay-problem); }
+      |/* a file field (Field.file): its chooser under the text area, the area a drop target */
+      |body label.okay-file { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px;
+      |  color: var(--okay-accent); font-weight: 600; cursor: pointer; }
+      |body label.okay-file input[type="file"] { font: inherit; color: var(--okay-muted); }
       |/* text as written (Part.code): lines kept, monospace, the current ones marked */
       |body .okay-mark-code { display: block; }
       |body .okay-mark-code > .okay-group { font-family: var(--okay-mono); font-size: 0.85em; line-height: 1.45;

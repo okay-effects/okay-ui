@@ -60,6 +60,9 @@ object model:
   enum Kind:
     case Text, LongText, Secret, Whole, Decimal, Date, Flag
     case Money(currency: String)
+    /** a file's text: chosen or dropped where a face can, pasted where it cannot; `accept` as a browser takes it
+     * (".json,.plutus", "application/json"), empty for any */
+    case File(accept: String)
     /** the options' keys and labels */
     case Choice(options: List[(String, String)])
 
@@ -99,6 +102,10 @@ object model:
 
     def text(label: String): Field[String] = required[String](label, Kind.Text, Entry.Text(_))(e => Right(e.text.trim))
     def longText(label: String): Field[String] = required[String](label, Kind.LongText, Entry.Text(_))(e => Right(e.text))
+    /** A FILE'S TEXT: a page offers to choose or drop the file (its text read into the field), any face takes it
+     * pasted; `accept` the kinds a browser's chooser offers, empty for any */
+    def file(label: String, accept: String = ""): Field[String] =
+      required[String](label, Kind.File(accept), Entry.Text(_))(e => Right(e.text))
     def secret(label: String): Field[String] = required[String](label, Kind.Secret, Entry.Text(_))(e => Right(e.text))
     def whole(label: String): Field[Long] = required[Long](label, Kind.Whole, n => Entry.Number(BigDecimal(n)))(e =>
       number(e).flatMap(n => if n.isWhole && n.isValidLong then Right(n.toLong) else Left("a whole number")))
@@ -235,6 +242,12 @@ object model:
       require(fs.map(_.key).distinct.size == fs.size, s"a form's keys are unique: ${fs.map(_.key).mkString(", ")}")
       new Form[Values[T]](fs, vs => Tuple.fromArray(vs.toArray[Any].map(_.asInstanceOf[Object])).asInstanceOf[Values[T]],
         p => p.asInstanceOf[Product].productIterator.toList, Nil)
+    /** FIELDS KNOWN ONLY WHEN THE PROGRAM RUNS (read from a schema, one per item of a list), read together into
+     * the list of their values, in order */
+    def list[A](fields: List[Field[A]]): Form[List[A]] =
+      val keys = fields.map(_.key)
+      require(keys.distinct.size == keys.size, s"a form's keys are unique: ${keys.mkString(", ")}")
+      new Form[List[A]](fields, vs => vs.asInstanceOf[List[A]], as => as, Nil)
     /** one field alone, its value as it is */
     def one[A](field: Field[A]): Form[A] = new Form[A](List(field), vs => vs.head.asInstanceOf[A], a => List(a), Nil)
 

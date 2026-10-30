@@ -37,5 +37,6 @@ object Dom:
         val program = OnFaces.program(Step.Waiting[S, S](screen, s => Step.Done(s)))
           .asInstanceOf[okay.effects.tagless.Program[Any, Face]]
         session.show(face.faces.steps[Any, Face, OnCek.Pure](face.faces.of(program)), a => answered(a.asInstanceOf[S]))
+        okay.business.laminar.FilePicking.attachSoon(root, screen)
       PageUi.handled(p, [S] => (screen: Screen[S], answered: S => Unit) => draw[S](screen, answered))
     }

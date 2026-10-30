@@ -221,3 +221,11 @@ request sent by a transport (the full URL and the request to a `Future[Response]
 `Async`. `InThePage.fetching` sends by okay-http's `Browser.fetch`, `OnTheJvm.fetching` by the JDK's client. A program
 says okay-http's `Fetch` — the family's one HTTP effect (okay-serverless does the same) — and a page answers it.
 
+## A file's text (2026-10-30)
+
+`Field.file(label, accept)` (`Kind.File`): a field holding a file's text — a transaction file, a blueprint. To every
+face it is long text (pasted at a terminal, sent as text by an agent); in a page `Laminar.run` and `Dom.run` put a
+chooser ("Choose a file…", `accept` passed to the browser) beside its text area and make the area a drop target, the
+file's text read into the area (`FilePicking`), where the face reads it when the form is sent. okay-faces' markup is
+untouched: the chooser is added after the face has drawn (`OnFaces.files(screen)` names the areas).
+

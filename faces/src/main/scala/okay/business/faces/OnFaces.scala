@@ -136,9 +136,25 @@ object OnFaces:
     b.needs.flatMap {
       case f: Form[?] =>
         val i = screen.input(f)
-        f.fields.filter(_.kind == Kind.LongText).map(field => if several then s"$i-${field.key}" else field.key)
+        f.fields.filter(f => f.kind == Kind.LongText || f.kind.isInstanceOf[Kind.File])
+          .map(field => if several then s"$i-${field.key}" else field.key)
       case _ => Nil
     }
+
+  /** THE FILE FIELDS OF A SCREEN, as a face names their controls: each its parameter's name and what it accepts; a
+   * page puts a chooser and a drop beside each (`okay.business.laminar.FilePicking`) */
+  def files(screen: Screen[?]): List[(String, String)] =
+    screen.buttons.flatMap { b =>
+      val several = b.needs.size > 1
+      b.needs.flatMap {
+        case f: Form[?] =>
+          val i = screen.input(f)
+          f.fields.collect { case field if field.kind.isInstanceOf[Kind.File] =>
+            (if several then s"$i-${field.key}" else field.key) -> field.kind.asInstanceOf[Kind.File].accept
+          }
+        case _ => Nil
+      }
+    }.distinct
 
   /** the parameters of a button its forms hold back (`Field.more`): drawn under "Options" where a face can */
   private def held(screen: Screen[?], b: Button[?]): List[String] =
@@ -179,7 +195,8 @@ object OnFaces:
   def shapeOf[A](field: Field[A], name: String): Shape.Field[Entry] =
     val checked: Entry => Either[String, Entry] = e => field.read(e).map(_ => e)
     val base: Shape[Entry] = field.kind match
-      case Kind.Text | Kind.LongText | Kind.Secret => Shape.text.refine(s => checked(Entry.Text(s)))(_.text)
+      case Kind.Text | Kind.LongText | Kind.Secret | Kind.File(_) =>
+        Shape.text.refine(s => checked(Entry.Text(s)))(_.text)
       case Kind.Whole | Kind.Decimal | Kind.Money(_) =>
         Shape.number.refine(n => checked(Entry.Number(n))) {
           case Entry.Number(n) => n

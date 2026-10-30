@@ -35,5 +35,6 @@ object Laminar:
           render(root, div(cls := "okay-ui", child <-- shown.signal))
           mounted = true
         shown.set(face.handle(OnFaces.program(Step.Waiting[S, S](screen, s => Step.Done(s))), settings, answered))
+        FilePicking.attachSoon(root, screen)
       PageUi.handled(p, [S] => (screen: Screen[S], answered: S => Unit) => draw[S](screen, answered))
     }
