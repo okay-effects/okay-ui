@@ -118,8 +118,8 @@ object Skin:
       |body .okay-mark-tree > .okay-group { font-family: var(--okay-mono); font-size: 0.85em; line-height: 1.5;
       |  background: var(--okay-surface); border: 1px solid var(--okay-border); border-radius: 10px;
       |  padding: 10px 14px; overflow-x: auto; }
-      |body .okay-mark-tree .okay-mark, body .okay-mark-tree .okay-group { display: block; margin: 0; padding: 0;
-      |  border: 0; background: none; box-shadow: none; }
+      |body .okay-mark-tree .okay-mark, body .okay-mark-tree > .okay-group .okay-group { display: block; margin: 0;
+      |  padding: 0; border: 0; background: none; box-shadow: none; }
       |body .okay-mark-tree .okay-text { margin: 0; white-space: pre; font-family: inherit; }
       |body .okay-mark-tree-children { padding-left: 1.4em !important; border-left: 1px dotted var(--okay-border); }
       |body .okay-mark-tree-node > .okay-mark > .okay-group > .okay-mark-tree-children,
