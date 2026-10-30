@@ -113,6 +113,15 @@ object Skin:
       |body .okay-mark-button-primary > .okay-mark-button > .okay-ref { background: var(--okay-accent);
       |  border-color: var(--okay-accent); color: #ffffff; }
       |body .okay-mark-button-danger > .okay-mark-button > .okay-ref { color: var(--okay-problem); }
+      |/* text as written (Part.code): lines kept, monospace, the current ones marked */
+      |body .okay-mark-code { display: block; }
+      |body .okay-mark-code > .okay-group { font-family: var(--okay-mono); font-size: 0.85em; line-height: 1.45;
+      |  background: var(--okay-surface); border: 1px solid var(--okay-border); border-radius: 10px;
+      |  padding: 10px 0; overflow-x: auto; }
+      |body .okay-mark-code .okay-mark-code-line, body .okay-mark-code .okay-mark-code-line-current { display: block; }
+      |body .okay-mark-code .okay-text { margin: 0; padding: 0 14px; white-space: pre; font-family: inherit; }
+      |body .okay-mark-code-line-current > .okay-text { background: color-mix(in srgb, var(--okay-accent) 16%,
+      |  transparent); box-shadow: inset 3px 0 0 var(--okay-accent); }
       |body .okay-form input[type="checkbox"] { width: 22px; height: 22px; padding: 0; align-self: flex-start;
       |  margin: 8px 0;
       |  accent-color: var(--okay-accent); }

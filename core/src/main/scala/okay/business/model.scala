@@ -188,6 +188,12 @@ object model:
     final case class Block(mark: String, title: Option[String], parts: List[Part]) extends Part
     def block(mark: String, title: String = "")(parts: Part*): Part =
       Block(mark, Option(title).filter(_.nonEmpty), parts.toList)
+    /** TEXT AS WRITTEN — code, a log, a program's term: its lines kept as they are, in the skin's monospace; the lines
+     * numbered in `current` (from 0) marked — a debugger's step, a match */
+    final case class Code(lines: List[String], current: Set[Int], title: Option[String]) extends Part
+    def code(text: String, current: Int*): Part = Code(text.split("\n", -1).toList, current.toSet, None)
+    def code(title: String, lines: List[String], current: Set[Int]): Part =
+      Code(lines, current, Option(title).filter(_.nonEmpty))
     /** where the screen's buttons `at(name)` stand */
     final case class Slot(name: String) extends Part
     def slot(name: String): Part = Slot(name)

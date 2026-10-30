@@ -83,6 +83,10 @@ object OnFaces:
       val buttons = at.getOrElse(name, Nil).map((b, key, _) =>
         View.Marked(s"button-${b.style.toString.toLowerCase}", View.Marked("button", View.Ref(key, b.label))))
       if buttons.isEmpty then Nil else List(View.Marked("slot", View.Group(None, buttons.toVector)))
+    // TEXT AS WRITTEN: a group of lines under the mark `code`, each line marked `code-line` (`code-line-current`); the
+    // skin keeps their spaces and sets them in its monospace, a face of text shows them as they are
+    case Part.Code(lines, current, title) => List(View.Marked("code", View.Group(title, lines.zipWithIndex.map((l, i) =>
+        View.Marked(if current(i) then "code-line-current" else "code-line", View.Text(l))).toVector)))
     case Part.Link(label, url) => List(View.Link(label, url))
     case Part.Qr(text, alt) => List(View.qr(text, alt))
     // A PICTURE, as data on both sides: okay-faces' View.Picture

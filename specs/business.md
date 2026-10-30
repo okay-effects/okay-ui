@@ -198,3 +198,15 @@ makes it okay-faces' own point (`Face.Mark`), which a host that loses its memory
 `Part.qr(text, alt)`: a QR code on a screen — an address for a phone's camera. The model holds the text alone; the
 code is the toolkit's: `OnFaces` makes it okay-faces' `View.qr` (a picture, dark on light in either scheme), a
 toolkit with no pictures says `alt` or the text.
+
+## Text as written, and keys (2026-10-30)
+
+`Part.code(text, current*)` / `Part.code(title, lines, current)`: text whose lines and spaces matter — code, a log,
+a program's term in a debugger. The model holds the lines and the numbers of the current ones; `OnFaces` makes it
+okay-faces' views it already has — a group under the mark `code`, each line a text under `code-line` or
+`code-line-current` — so every face shows it with no new view: a face of text prints the lines, the skin sets them in
+its monospace with their spaces kept and the current line marked.
+
+`Keys.events(pick)` (Scala.js, `okay.business.laminar`): keys pressed in the page as `Events` —
+`screen.until(Keys.events(pick))` answers the screen with `pick(key)` as a button would. A key typed into a field, or
+with Ctrl, Alt or Meta held, is never an event. The first user is okay-uplc's stepping view (arrows step the machine).
