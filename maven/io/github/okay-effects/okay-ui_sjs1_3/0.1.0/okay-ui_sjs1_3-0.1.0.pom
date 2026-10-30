@@ -57,6 +57,11 @@
         </dependency>
         <dependency>
             <groupId>io.github.okay-effects</groupId>
+            <artifactId>okay-http_sjs1_3</artifactId>
+            <version>0.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.okay-effects</groupId>
             <artifactId>okay-faces-laminar_sjs1_3</artifactId>
             <version>0.1.0</version>
         </dependency>
