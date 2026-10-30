@@ -42,6 +42,15 @@ trait Business extends Kernel:
       case Settings.Get(n) => kept.get(n)
       case Settings.Put(n, v) => kept(n) = v))
 
+  /** `text` copied to the clipboard, where the platform has one: whether it was */
+  def copy[R[_]](text: String)(using In[Clipboard, R]): Boolean ! R = perform[Clipboard](Clipboard.Copy(text))
+
+  /** THE CLIPBOARD AS A LIST of what was copied, newest last: a test's */
+  def copiedTo[R[_], Rest[_], A](copied: scala.collection.mutable.Buffer[String])(p: A ! R)(
+    using Split[Clipboard, R, Rest]): A ! Rest =
+    handle(p, Handler.Tail[Clipboard, Rest, A, A](a => pure(a), [X] => (asked: Clipboard[X]) => asked match
+      case Clipboard.Copy(t) => copied += t; true))
+
   /** a text, read and acknowledged */
   def inform[R[_]](title: String, text: String)(using In[Ui, R]): Unit ! R =
     show(Screen[Unit](title)(Part.Text(text))(Button("OK", Style.Primary)(())))

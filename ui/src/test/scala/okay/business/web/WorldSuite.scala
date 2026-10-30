@@ -9,6 +9,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class WorldSuite extends munit.FunSuite:
   given ExecutionContext = munitExecutionContext
 
+  test("text copied is answered true and kept, newest last"):
+    type App[X] = Clipboard[X]
+    val copied = scala.collection.mutable.Buffer.empty[String]
+    assertEquals(run(copiedTo(copied)(copy[App]("a").flatMap(_ => copy[App]("b")))), true)
+    assertEquals(copied.toList, List("a", "b"))
+
   test("a setting kept is read back; none is None"):
     type App[X] = Settings[X]
     val kept = scala.collection.mutable.Map("a" -> "1")

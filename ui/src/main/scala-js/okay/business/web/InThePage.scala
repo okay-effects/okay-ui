@@ -14,6 +14,17 @@ object InThePage:
     ExecutionContext): A ! Rest =
     Fetching.by((url, r) => Browser.fetch("")(summon[ExecutionContext])(r.copy(path = url, query = Map.empty)))(p)
 
+  /** `Clipboard` by the browser's (`navigator.clipboard`): `false` where the page may not write it */
+  def clipboard[R[_], Rest[_], A](p: A ! R)(using Split[okay.business.model.Clipboard, R, Rest]): A ! Rest =
+    handle(p, Handler.tail[okay.business.model.Clipboard, Rest, A, A](a => pure(a))(
+      [X] => (asked: okay.business.model.Clipboard[X]) => asked match
+        case okay.business.model.Clipboard.Copy(t) =>
+          val clip = dom.window.navigator.asInstanceOf[scalajs.js.Dynamic].clipboard
+          if scalajs.js.isUndefined(clip) then false
+          else
+            clip.writeText(t)
+            true))
+
   /** `Settings` in the page's local storage, each name under `prefix` */
   def kept[R[_], Rest[_], A](prefix: String)(p: A ! R)(using Split[Settings, R, Rest]): A ! Rest =
     handle(p, Handler.tail[Settings, Rest, A, A](a => pure(a))([X] => (asked: Settings[X]) => asked match

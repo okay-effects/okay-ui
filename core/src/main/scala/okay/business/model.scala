@@ -404,6 +404,10 @@ object model:
     case Get(name: String) extends Settings[Option[String]]
     case Put(name: String, value: String) extends Settings[Unit]
 
+  /** TEXT COPIED FOR THE PERSON TO PASTE ELSEWHERE — a link, a key — as an effect: answered whether it was copied */
+  enum Clipboard[X]:
+    case Copy(text: String) extends Clipboard[Boolean]
+
   // ---- THE EFFECT AND ITS STEPS
 
   /** THE EFFECT: a screen shown, answered by the result of the button pressed */

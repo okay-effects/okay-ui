@@ -229,3 +229,8 @@ chooser ("Choose a file…", `accept` passed to the browser) beside its text are
 file's text read into the area (`FilePicking`), where the face reads it when the form is sent. okay-faces' markup is
 untouched: the chooser is added after the face has drawn (`OnFaces.files(screen)` names the areas).
 
+## The clipboard (2026-10-30)
+
+`Clipboard` (in the model): `copy(text)` answers whether the text was copied. Handlers: `copiedTo(buffer)` (a test's),
+`InThePage.clipboard` (the browser's `navigator.clipboard`; `false` where the page may not write it).
+
