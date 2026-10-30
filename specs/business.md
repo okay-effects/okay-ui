@@ -210,3 +210,14 @@ its monospace with their spaces kept and the current line marked.
 `Keys.events(pick)` (Scala.js, `okay.business.laminar`): keys pressed in the page as `Events` —
 `screen.until(Keys.events(pick))` answers the screen with `pick(key)` as a button would. A key typed into a field, or
 with Ctrl, Alt or Meta held, is never an event. The first user is okay-uplc's stepping view (arrows step the machine).
+
+## Settings, and HTTP out (2026-10-30)
+
+`Settings` (in the model): what an application keeps between visits, its values text — `setting(name)`,
+`keep(name, value)`. Handlers: `keptIn(map)` (memory, any kernel), `InThePage.kept(prefix)` (the page's local storage).
+
+`okay.business.web.Fetching.by(transport)`: okay-http's client effect `Fetch` (`Call`, `Send`) on okay-scala, each
+request sent by a transport (the full URL and the request to a `Future[Response]`) and awaited through okay-scala's
+`Async`. `InThePage.fetching` sends by okay-http's `Browser.fetch`, `OnTheJvm.fetching` by the JDK's client. A program
+says okay-http's `Fetch` — the family's one HTTP effect (okay-serverless does the same) — and a page answers it.
+

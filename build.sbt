@@ -49,6 +49,7 @@ lazy val simpleKernel = crossProject(platforms: _*).crossType(CrossType.Pure).in
 
 /** okay-faces, released (0.1.0 as republished 2026-10-24: `View.Link`, `Action.more`) */
 val okayFaces = "0.1.0"
+val okayHttp = "0.1.1"
 ThisBuild / resolvers += "okay-faces" at "https://okay-effects.github.io/okay-faces/maven"
 ThisBuild / resolvers += "okay-http" at "https://okay-effects.github.io/okay-http/maven"
 /** okay-mcp: okay-faces' MCP face, which its Cloudflare module serves */
@@ -172,7 +173,10 @@ lazy val referenceThin = crossProject(platforms: _*).crossType(CrossType.Pure).i
 /** THE DEFAULT: okay-scala's machine and okay-faces' faces — `"io.github.okay-effects" %% "okay-ui" % ...` */
 lazy val ui = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("ui"))
   .dependsOn(scala3Kernel, faces)
-  .settings(name := "okay-ui", libraryDependencies += munit.value)
+  .settings(name := "okay-ui", libraryDependencies ++= Seq(munit.value,
+    "io.github.okay-effects" %%% "okay-http" % okayHttp))
+  // ON THE JVM: okay-http's `Fetch` by the JDK's client (`OnTheJvm`)
+  .jvmSettings(Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-jvm")
   // IN A PAGE: `Laminar.run(root)`, `Ui` into okay-scala's `Lifted[Future]` on okay-faces' Laminar face
   .whenJs(
     Compile / unmanagedSourceDirectories += baseDirectory.value.getParentFile / "src" / "main" / "scala-js",

@@ -28,6 +28,20 @@ trait Business extends Kernel:
    * and starts the program there again (okay-faces' points, `Durable`) */
   def mark[R[_]](point: String, state: String)(using In[Ui, R]): Unit ! R = perform[Ui](Ui.Mark(point, state))
 
+  /** a setting kept between visits (`Settings`), if any */
+  def setting[R[_]](name: String)(using In[Settings, R]): Option[String] ! R = perform[Settings](Settings.Get(name))
+
+  /** a setting kept for the next visit */
+  def keep[R[_]](name: String, value: String)(using In[Settings, R]): Unit ! R =
+    perform[Settings](Settings.Put(name, value))
+
+  /** SETTINGS KEPT IN `kept`, a map of the caller's: memory — a test's, a session that need not last */
+  def keptIn[R[_], Rest[_], A](kept: scala.collection.mutable.Map[String, String])(p: A ! R)(
+    using Split[Settings, R, Rest]): A ! Rest =
+    handle(p, Handler.Tail[Settings, Rest, A, A](a => pure(a), [X] => (asked: Settings[X]) => asked match
+      case Settings.Get(n) => kept.get(n)
+      case Settings.Put(n, v) => kept(n) = v))
+
   /** a text, read and acknowledged */
   def inform[R[_]](title: String, text: String)(using In[Ui, R]): Unit ! R =
     show(Screen[Unit](title)(Part.Text(text))(Button("OK", Style.Primary)(())))

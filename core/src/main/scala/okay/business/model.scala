@@ -380,6 +380,17 @@ object model:
       def fire(a: A): Unit = listeners.foreach(_(a))
       def listening: Int = listeners.size
 
+  // ---- WHAT IS KEPT BETWEEN VISITS
+
+  /**
+   * WHAT AN APPLICATION KEEPS BETWEEN VISITS — a provider's key, the choice made last time — as an effect, its values
+   * text: where they are kept is a handler's (the page's local storage, memory for a test or a session that need not
+   * last). Words: `setting(name)`, `keep(name, value)`; handlers: `keptIn(map)`, `InThePage.kept(prefix)` in a page.
+   */
+  enum Settings[X]:
+    case Get(name: String) extends Settings[Option[String]]
+    case Put(name: String, value: String) extends Settings[Unit]
+
   // ---- THE EFFECT AND ITS STEPS
 
   /** THE EFFECT: a screen shown, answered by the result of the button pressed */
