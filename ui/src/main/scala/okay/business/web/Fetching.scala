@@ -16,8 +16,12 @@ object Fetching:
 
   def by[R[_], Rest[_], A](send: Transport)(p: A ! R)(
     using Split[Fetch, R, Rest], In[Async, Rest], ExecutionContext): A ! Rest =
+    // NO ANSWER AT ALL — the network, CORS, a permission refused — is a response of status 0 saying why, as okay-http's
+    // other clients answer it: the program goes on and says so, it never waits forever
+    def sent(url: String, r: Request) = send(url, r).recover { case e =>
+      Response(0, Map.empty, Option(e.getMessage).getOrElse(e.toString)) }
     handle(p, Handler.general[Fetch, Rest, A, A](a => pure(a))([X] => (op: Fetch[X], k: X => A ! Rest) => op match
       case Fetch.Call(method, url, headers, body, answer) =>
-        Async.fromFuture[Response, Rest](send(url, Fetch.request(method, url, headers, body))).flatMap(r => k(answer(r)))
+        Async.fromFuture[Response, Rest](sent(url, Fetch.request(method, url, headers, body))).flatMap(r => k(answer(r)))
       case Fetch.Send(base, request, answer) =>
-        Async.fromFuture[Response, Rest](send(Fetch.target(base, request), request)).flatMap(r => k(answer(r)))))
+        Async.fromFuture[Response, Rest](sent(Fetch.target(base, request), request)).flatMap(r => k(answer(r)))))

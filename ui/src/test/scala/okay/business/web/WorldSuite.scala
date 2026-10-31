@@ -35,3 +35,10 @@ class WorldSuite extends munit.FunSuite:
       assertEquals(got, ("answer to https://example.org/a?b=1", "answer to https://x.org/y"))
       assertEquals(asked, List("https://example.org/a?b=1" -> "GET", "https://x.org/y" -> "POST"))
     }
+
+  test("no answer at all is a response of status 0 saying why"):
+    type App[X] = (Async + Fetch)[X]
+    val refused: Fetching.Transport = (_, _) => Future.failed(RuntimeException("blocked by CORS"))
+    val p = perform[Fetch][App, Response](Fetch.Call("GET", "https://example.org/", Map.empty, "", r => r))
+    Async.toFuture(Fetching.by(refused)(p)).map(r => assertEquals((r.status, r.body), (0, "blocked by CORS")))
+
