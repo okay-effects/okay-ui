@@ -159,9 +159,10 @@ object Skin:
       |body label.okay-file input[type="file"] { font: inherit; color: var(--okay-muted); }
       |/* text as written (Part.code): lines kept, monospace, the current ones marked */
       |body .okay-mark-code { display: block; }
+      |/* lines one under the other, no group gap between them (a group's 12px gap made code double-spaced) */
       |body .okay-mark-code > .okay-group { font-family: var(--okay-mono); font-size: 0.85em; line-height: 1.45;
       |  background: var(--okay-surface); border: 1px solid var(--okay-border); border-radius: 10px;
-      |  padding: 10px 0; overflow-x: auto; }
+      |  padding: 10px 0; overflow-x: auto; gap: 0; }
       |body .okay-mark-code .okay-mark-code-line, body .okay-mark-code .okay-mark-code-line-current { display: block; }
       |body .okay-mark-code .okay-text { margin: 0; padding: 0 14px; white-space: pre; font-family: inherit; }
       |body .okay-mark-code-line-current > .okay-text { background: color-mix(in srgb, var(--okay-accent) 16%,
