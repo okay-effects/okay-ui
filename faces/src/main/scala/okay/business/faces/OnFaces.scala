@@ -57,6 +57,7 @@ object OnFaces:
   def placed(screen: Screen[?]): Map[String, List[(Button[?], String, Int)]] =
     def slots(ps: List[Part]): List[String] = ps.flatMap {
       case Part.Slot(n) => List(n)
+      case tb: Table[r] => tb.rows.flatMap(tb.cells).collect { case Cell.Slot(n) => n }
       case Part.Section(_, inner) => slots(inner)
       case Part.Block(_, _, inner) => slots(inner)
       case _ => Nil
@@ -70,6 +71,12 @@ object OnFaces:
     at.zipWithIndex.map { case ((b, k, i), j) => (b, if keys.indexOf(k) == j then k else s"$k-$i", i) }
       .groupBy(_._1.slot.get)
 
+  /** the buttons at a slot, as refs under the mark `slot` — a screen's slot or a row's cell */
+  private def slotted(name: String, at: Map[String, List[(Button[?], String, Int)]]): Option[View] =
+    val buttons = at.getOrElse(name, Nil).map((b, key, _) =>
+      View.Marked(s"button-${b.style.toString.toLowerCase}", View.Marked("button", View.Ref(key, b.label))))
+    Option.when(buttons.nonEmpty)(View.Marked("slot", View.Group(None, buttons.toVector)))
+
   private def part(p: Part, at: Map[String, List[(Button[?], String, Int)]]): List[View] = p match
     case Part.Text(s) => List(View.text(s))
     case Part.Notice(Level.Info, s) => List(View.info(s))
@@ -79,10 +86,7 @@ object OnFaces:
     case Part.Section(title, parts) => List(View.Group(Some(title), parts.flatMap(part(_, at)).toVector))
     case Part.Block(mark, title, parts) =>
       List(View.Marked(mark, View.Group(title, parts.flatMap(part(_, at)).toVector)))
-    case Part.Slot(name) =>
-      val buttons = at.getOrElse(name, Nil).map((b, key, _) =>
-        View.Marked(s"button-${b.style.toString.toLowerCase}", View.Marked("button", View.Ref(key, b.label))))
-      if buttons.isEmpty then Nil else List(View.Marked("slot", View.Group(None, buttons.toVector)))
+    case Part.Slot(name) => slotted(name, at).toList
     // TEXT AS WRITTEN: a group of lines under the mark `code`, each line marked `code-line` (`code-line-current`); the
     // skin keeps their spaces and sets them in its monospace, a face of text shows them as they are
     case Part.Code(lines, current, title) => List(View.Marked("code", View.Group(title, lines.zipWithIndex.map((l, i) =>
@@ -107,8 +111,10 @@ object OnFaces:
       }, text))
     case t: Table[r] =>
       if t.rows.isEmpty then List(View.text(t.empty))
-      else List(View.Table(t.columns.map(_.title).toVector, t.rows.map(r => t.cells(r).map(c => View.text(c.text))
-        .toVector).toVector))
+      else List(View.Table(t.columns.map(_.title).toVector, t.rows.map(r => t.cells(r).map {
+          case Cell.Slot(name) => slotted(name, at).getOrElse(View.text(""))
+          case c => View.text(c.text)
+        }.toVector).toVector))
     // a form is its button's parameters: shown where the face asks for them
     case _: Form[?] => Nil
 

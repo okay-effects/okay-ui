@@ -46,3 +46,22 @@ class LiveSuite extends munit.FunSuite:
     a.fire("three")
     assertEquals(got, List("one", "two"))
     assertEquals((a.listening, b.listening), (0, 0))
+
+  test("a row's buttons: a slot cell of a table holds the buttons at its name, chosen by a ref as any slot's"):
+    final case class Row(name: String, slot: String)
+    val rows = List(Row("Vesting", "row-1"), Row("Escrow", "row-2"))
+    val table = Table(rows)(Column.text("Case")(_.name), Column.slot("")(_.slot))
+    val s = Screen[String]("Examples")(table)(rows.flatMap(r => List(
+      Button(s"Step", Style.Primary)(s"step ${r.name}").at(r.slot),
+      Button(s"Source")(s"source ${r.name}").at(r.slot)))*)
+    OnFaces.view(s, Nil) match
+      case View.Group(_, children) => children.collectFirst { case t: View.Table => t } match
+          case Some(t) =>
+            assertEquals(t.rows(1)(1), View.Marked("slot", View.Group(None, Vector(
+              View.Marked("button-primary", View.Marked("button", View.Ref("row-2/step", "Step"))),
+              View.Marked("button-plain", View.Marked("button", View.Ref("row-2/source", "Source")))))))
+          case None => fail(s"no table: $children")
+      case other => fail(s"not a group: $other")
+    val ref = OnFaces.actions(s).last
+    val chosen = ref.taken(okay.effects.json.Json.obj("key" -> okay.effects.json.Json.Str("row-2/source")))
+    assertEquals(chosen.map(a => s.press(a)), Right(Right("source Escrow")))

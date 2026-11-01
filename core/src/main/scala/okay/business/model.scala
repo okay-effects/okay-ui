@@ -266,6 +266,8 @@ object model:
     case Money(n: BigDecimal, currency: String)
     case Date(d: Day)
     case Flag(b: Boolean)
+    /** where the buttons `.at(name)` stand: a row's own actions, in its cell */
+    case Slot(name: String)
 
     def text: String = this match
       case Blank => ""
@@ -274,6 +276,7 @@ object model:
       case Money(n, c) => s"${n.setScale(2).bigDecimal.toPlainString} $c"
       case Date(d) => d.toString
       case Flag(b) => if b then "yes" else "no"
+      case Slot(_) => ""
 
   object Cell:
     given Conversion[String, Cell] = Text(_)
@@ -286,6 +289,8 @@ object model:
       Column(title, r => Cell.Money(f(r), currency))
     def date[R](title: String)(f: R => Day): Column[R] = Column(title, r => Cell.Date(f(r)))
     def flag[R](title: String)(f: R => Boolean): Column[R] = Column(title, r => Cell.Flag(f(r)))
+    /** a row's buttons: each row's slot named by `f` — the buttons `.at` that name stand in its cell */
+    def slot[R](title: String)(f: R => String): Column[R] = Column(title, r => Cell.Slot(f(r)))
 
   /** A TABLE: rows, its columns, each row a key; an input of the screen: a button that needs a row selected names it */
   final class Table[R] private[model] (val rows: List[R], val columns: List[Column[R]], val key: R => String,

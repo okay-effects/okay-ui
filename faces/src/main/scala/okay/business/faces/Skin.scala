@@ -102,6 +102,9 @@ object Skin:
       | * keeps room for a word (no "argume-nt") */
       |body .okay-table td, body .okay-table td .okay-text { overflow-wrap: anywhere; }
       |body .okay-table td:not(:first-child):not(:last-child) { min-width: 5.5em; }
+      |/* a row's buttons (Column.slot): side by side, wrapping between buttons, never inside a label */
+      |body .okay-table td .okay-mark-slot .okay-ref { white-space: nowrap; overflow-wrap: normal; }
+      |body .okay-table td .okay-mark-slot > .okay-group { gap: 6px; }
       |body .okay-notice-info, body .okay-told, body .okay-datum { border-radius: 10px;
       |  border: 1px solid var(--okay-border); }
       |body .okay-notice-warning, body .okay-notice-problem { border-radius: 10px; }
