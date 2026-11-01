@@ -100,7 +100,8 @@ object Skin:
       |/* a value too long for a phone (a hash, a term) breaks anywhere in the last column, where values are; the
       | * other columns break between words only (no "argume-nt") */
       |body .okay-table td { overflow-wrap: anywhere; }
-      |body .okay-table td:not(:last-child), body .okay-table td:not(:last-child) .okay-text { overflow-wrap: break-word; }
+      |body .okay-table td:not(:last-child), body .okay-table td:not(:last-child) .okay-text {
+      |  overflow-wrap: break-word; }
       |body .okay-notice-info, body .okay-told, body .okay-datum { border-radius: 10px;
       |  border: 1px solid var(--okay-border); }
       |body .okay-notice-warning, body .okay-notice-problem { border-radius: 10px; }
