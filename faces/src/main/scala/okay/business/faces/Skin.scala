@@ -105,6 +105,11 @@ object Skin:
       |/* a row's buttons (Column.slot): side by side, wrapping between buttons, never inside a label */
       |body .okay-table td .okay-mark-slot .okay-ref { white-space: nowrap; overflow-wrap: normal; }
       |body .okay-table td .okay-mark-slot > .okay-group { gap: 6px; }
+      |/* a table with row buttons lists things by name: its words kept whole; its buttons compact */
+      |body .okay-table:has(.okay-mark-slot) td, body .okay-table:has(.okay-mark-slot) td .okay-text {
+      |  overflow-wrap: break-word; }
+      |body .okay-table td .okay-mark-button > .okay-ref { min-height: 34px; padding: 6px 12px; font-size: 0.92em; }
+      |body .okay-table td:has(.okay-mark-slot) { padding-left: 6px; padding-right: 10px; }
       |body .okay-notice-info, body .okay-told, body .okay-datum { border-radius: 10px;
       |  border: 1px solid var(--okay-border); }
       |body .okay-notice-warning, body .okay-notice-problem { border-radius: 10px; }
