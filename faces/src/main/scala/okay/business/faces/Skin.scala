@@ -97,11 +97,10 @@ object Skin:
       |  padding: 11px 14px; }
       |body .okay-table tbody tr:last-child td { border-bottom: 0; }
       |body .okay-table tbody tr:hover td { background: color-mix(in srgb, var(--okay-accent) 5%, transparent); }
-      |/* a value too long for a phone (a hash, a term) breaks anywhere in the last column, where values are; the
-      | * other columns break between words only (no "argume-nt") */
-      |body .okay-table td { overflow-wrap: anywhere; }
-      |body .okay-table td:not(:last-child), body .okay-table td:not(:last-child) .okay-text {
-      |  overflow-wrap: break-word; }
+      |/* a value too long for a phone (a hash, a term, a long name) breaks anywhere, in any column; a middle column
+      | * keeps room for a word (no "argume-nt") */
+      |body .okay-table td, body .okay-table td .okay-text { overflow-wrap: anywhere; }
+      |body .okay-table td:not(:first-child):not(:last-child) { min-width: 5.5em; }
       |body .okay-notice-info, body .okay-told, body .okay-datum { border-radius: 10px;
       |  border: 1px solid var(--okay-border); }
       |body .okay-notice-warning, body .okay-notice-problem { border-radius: 10px; }
