@@ -71,7 +71,8 @@ object Skin:
       |  color: var(--okay-fg); }
       |body .okay-form input:focus, body .okay-form select:focus, body .okay-form textarea:focus {
       |  border-color: var(--okay-accent); }
-      |body .okay-form textarea { min-height: 88px; resize: vertical; }
+      |/* a long text grows with what is in it (to most of the screen, then it scrolls), and can be pulled taller */
+      |body .okay-form textarea { min-height: 88px; max-height: 75vh; resize: vertical; field-sizing: content; }
       |body .okay-form > .okay-action { align-self: flex-start; min-width: 160px; }
       |/* the fields held back: Options, a row of its own at the end, its fields as the others when opened */
       |body .okay-form fieldset > .okay-more { grid-column: 1 / -1; }
