@@ -19,6 +19,9 @@ object Skin:
   /** the stylesheet's rules, in the tokens only: one text for every accent and scheme */
   private val rules: String =
     """html, body { background: var(--okay-bg); margin: 0; min-height: 100%; }
+      |/* a phone shows the page at its own width: no word too long for it (an identifier, a hash), no text inflated */
+      |html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+      |body .okay-text { overflow-wrap: anywhere; }
       |body { display: flex; flex-direction: column; min-height: 100vh; }
       |body > #app { flex: 1; }
       |
@@ -94,7 +97,7 @@ object Skin:
       |  padding: 11px 14px; }
       |body .okay-table tbody tr:last-child td { border-bottom: 0; }
       |body .okay-table tbody tr:hover td { background: color-mix(in srgb, var(--okay-accent) 5%, transparent); }
-      |body .okay-table td { overflow-wrap: break-word; }
+      |body .okay-table td { overflow-wrap: anywhere; }
       |body .okay-notice-info, body .okay-told, body .okay-datum { border-radius: 10px;
       |  border: 1px solid var(--okay-border); }
       |body .okay-notice-warning, body .okay-notice-problem { border-radius: 10px; }
@@ -103,6 +106,9 @@ object Skin:
       |  body .okay-face { padding: 20px 16px 36px; }
       |  body .okay-heading-1 { font-size: 1.6em; }
       |  body .okay-actions > .okay-action { flex: 1 1 auto; }
+      |  /* a deep tree and a long text on a phone: a smaller step in, a pane that scrolls, not a page that grows */
+      |  body .okay-mark-tree-children { padding-left: 0.6em !important; }
+      |  body .okay-mark-tree > .okay-group, body .okay-mark-code > .okay-group { max-height: 70vh; overflow: auto; }
       |}
       |@media (prefers-reduced-motion: reduce) { body .okay-action { transition: none; } }
       |
