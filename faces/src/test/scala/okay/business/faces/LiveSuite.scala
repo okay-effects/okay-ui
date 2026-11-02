@@ -65,3 +65,13 @@ class LiveSuite extends munit.FunSuite:
     val ref = OnFaces.actions(s).last
     val chosen = ref.taken(okay.effects.json.Json.obj("key" -> okay.effects.json.Json.Str("row-2/source")))
     assertEquals(chosen.map(a => s.press(a)), Right(Right("source Escrow")))
+
+  test("a cell with a word too long for a phone is marked long; ordinary words are not"):
+    val t = Table(List("apply, argument next", "#" + "0" * 40))(Column.text("Holds")(identity))
+    OnFaces.view(Screen[Unit]("Cells")(t)(), Nil) match
+      case View.Group(_, children) => children.collectFirst { case v: View.Table => v } match
+          case Some(v) =>
+            assertEquals(v.rows(0)(0), View.text("apply, argument next"))
+            assertEquals(v.rows(1)(0), View.Marked("long", View.text("#" + "0" * 40)))
+          case None => fail("no table")
+      case other => fail(s"not a group: $other")

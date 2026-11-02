@@ -71,6 +71,14 @@ object OnFaces:
     at.zipWithIndex.map { case ((b, k, i), j) => (b, if keys.indexOf(k) == j then k else s"$k-$i", i) }
       .groupBy(_._1.slot.get)
 
+  /** a table's cell: under the mark `long` when a word in it is too long for a narrow screen (a hash, a term, a
+   * qualified name) — the skin breaks those anywhere, every other cell between words only */
+  private def cell(text: String): View =
+    if text.split("\\s+").exists(_.length > longWord) then View.Marked("long", View.text(text)) else View.text(text)
+
+  /** a word longer than this is broken anywhere in a table cell */
+  val longWord = 18
+
   /** the buttons at a slot, as refs under the mark `slot` — a screen's slot or a row's cell */
   private def slotted(name: String, at: Map[String, List[(Button[?], String, Int)]]): Option[View] =
     val buttons = at.getOrElse(name, Nil).map((b, key, _) =>
@@ -113,7 +121,7 @@ object OnFaces:
       if t.rows.isEmpty then List(View.text(t.empty))
       else List(View.Table(t.columns.map(_.title).toVector, t.rows.map(r => t.cells(r).map {
           case Cell.Slot(name) => slotted(name, at).getOrElse(View.text(""))
-          case c => View.text(c.text)
+          case c => cell(c.text)
         }.toVector).toVector))
     // a form is its button's parameters: shown where the face asks for them
     case _: Form[?] => Nil

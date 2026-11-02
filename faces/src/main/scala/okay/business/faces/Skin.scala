@@ -98,16 +98,14 @@ object Skin:
       |  padding: 11px 14px; }
       |body .okay-table tbody tr:last-child td { border-bottom: 0; }
       |body .okay-table tbody tr:hover td { background: color-mix(in srgb, var(--okay-accent) 5%, transparent); }
-      |/* a value too long for a phone (a hash, a term, a long name) breaks anywhere, in any column; a middle column
-      | * keeps room for a word (no "argume-nt") */
-      |body .okay-table td, body .okay-table td .okay-text { overflow-wrap: anywhere; }
-      |body .okay-table td:not(:first-child):not(:last-child) { min-width: 5.5em; }
+      |/* a cell's words kept whole; a cell with a word too long for a phone (OnFaces marks it `long`: a hash, a term, a
+      | * qualified name) breaks anywhere — so a narrow screen keeps its width without splitting ordinary words */
+      |body .okay-table td, body .okay-table td .okay-text { overflow-wrap: break-word; }
+      |body .okay-table td .okay-mark-long, body .okay-table td .okay-mark-long .okay-text { overflow-wrap: anywhere; }
       |/* a row's buttons (Column.slot): side by side, wrapping between buttons, never inside a label */
       |body .okay-table td .okay-mark-slot .okay-ref { white-space: nowrap; overflow-wrap: normal; }
       |body .okay-table td .okay-mark-slot > .okay-group { gap: 6px; }
-      |/* a table with row buttons lists things by name: its words kept whole; its buttons compact */
-      |body .okay-table:has(.okay-mark-slot) td, body .okay-table:has(.okay-mark-slot) td .okay-text {
-      |  overflow-wrap: break-word; }
+      |/* a row's buttons compact */
       |body .okay-table td .okay-mark-button > .okay-ref { min-height: 34px; padding: 6px 12px; font-size: 0.92em; }
       |body .okay-table td:has(.okay-mark-slot) { padding-left: 6px; padding-right: 10px; }
       |body .okay-notice-info, body .okay-told, body .okay-datum { border-radius: 10px;
@@ -118,6 +116,8 @@ object Skin:
       |  body .okay-face { padding: 20px 16px 36px; }
       |  body .okay-heading-1 { font-size: 1.6em; }
       |  body .okay-actions > .okay-action { flex: 1 1 auto; }
+      |  /* a table on a phone: less room around its cells, more for what is in them */
+      |  body .okay-table th, body .okay-table td { padding: 9px 8px; }
       |  /* a deep tree and a long text on a phone: a smaller step in, a pane that scrolls, not a page that grows */
       |  body .okay-mark-tree-children { padding-left: 0.6em !important; }
       |  body .okay-mark-tree > .okay-group, body .okay-mark-code > .okay-group { max-height: 70vh; overflow: auto; }
