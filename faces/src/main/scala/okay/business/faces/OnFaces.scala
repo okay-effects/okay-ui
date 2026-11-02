@@ -89,7 +89,7 @@ object OnFaces:
   private val separators = "_.-'()[],:/=#"
 
   /** `w` with zero-width spaces where it reads apart: after a separator, before an upper-case letter after a lower-case
-   * one (ScriptContext \u2192 Script\u00b7Context), and inside a run of 12 with neither (a hash) */
+   * one (ScriptContext: Script, Context), and inside a run of 12 with neither (a hash) */
   def breakable(w: String): String =
     val b = StringBuilder()
     var run = 0
