@@ -98,10 +98,9 @@ object Skin:
       |  padding: 11px 14px; }
       |body .okay-table tbody tr:last-child td { border-bottom: 0; }
       |body .okay-table tbody tr:hover td { background: color-mix(in srgb, var(--okay-accent) 5%, transparent); }
-      |/* a cell's words kept whole; a cell with a word too long for a phone (OnFaces marks it `long`: a hash, a term, a
-      | * qualified name) breaks anywhere — so a narrow screen keeps its width without splitting ordinary words */
+      |/* a cell breaks between words; a word too long for a phone has places to break of its own (OnFaces puts them
+      | * in) */
       |body .okay-table td, body .okay-table td .okay-text { overflow-wrap: break-word; }
-      |body .okay-table td .okay-mark-long, body .okay-table td .okay-mark-long .okay-text { overflow-wrap: anywhere; }
       |/* a row's buttons (Column.slot): side by side, wrapping between buttons, never inside a label */
       |body .okay-table td .okay-mark-slot .okay-ref { white-space: nowrap; overflow-wrap: normal; }
       |body .okay-table td .okay-mark-slot > .okay-group { gap: 6px; }

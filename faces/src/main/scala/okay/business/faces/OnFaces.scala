@@ -71,13 +71,33 @@ object OnFaces:
     at.zipWithIndex.map { case ((b, k, i), j) => (b, if keys.indexOf(k) == j then k else s"$k-$i", i) }
       .groupBy(_._1.slot.get)
 
-  /** a table's cell: under the mark `long` when a word in it is too long for a narrow screen (a hash, a term, a
-   * qualified name) — the skin breaks those anywhere, every other cell between words only */
+  /** a table's cell: a word too long for a narrow screen (a hash, a term, a qualified name) given places to break —
+   * zero-width spaces after its separators and every 16 letters in a row — so a cell breaks between words, and inside
+   * a long word only; marked `long` when it has one */
   private def cell(text: String): View =
-    if text.split("\\s+").exists(_.length > longWord) then View.Marked("long", View.text(text)) else View.text(text)
+    // runs of spaces and of the rest, kept (no look-behind: Scala.js targets ES2015 regexes)
+    val words = text.foldLeft(List.empty[String]) { (acc, c) => acc match
+      case w :: rest if w.last.isWhitespace == c.isWhitespace => (w + c) :: rest
+      case _                                                  => c.toString :: acc
+    }.reverse
+    if !words.exists(_.length > longWord) then View.text(text)
+    else View.Marked("long", View.text(words.map(w => if w.length > longWord then breakable(w) else w).mkString))
 
-  /** a word longer than this is broken anywhere in a table cell */
+  /** a word longer than this gets places to break in a table cell */
   val longWord = 18
+
+  private val separators = "_.-'()[],:/=#"
+
+  /** `w` with a zero-width space after each separator and inside every 16 other characters in a row */
+  def breakable(w: String): String =
+    val b = StringBuilder()
+    var run = 0
+    w.foreach { c =>
+      b += c
+      if separators.contains(c) then { b += '​'; run = 0 }
+      else { run += 1; if run >= 16 then { b += '​'; run = 0 } }
+    }
+    b.toString
 
   /** the buttons at a slot, as refs under the mark `slot` — a screen's slot or a row's cell */
   private def slotted(name: String, at: Map[String, List[(Button[?], String, Int)]]): Option[View] =
