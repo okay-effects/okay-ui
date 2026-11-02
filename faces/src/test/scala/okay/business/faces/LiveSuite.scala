@@ -73,7 +73,7 @@ class LiveSuite extends munit.FunSuite:
           case Some(v) =>
             assertEquals(v.rows(0)(0), View.text("apply, argument next"))
             val zw = "\u200b"
-            assertEquals(v.rows(1)(0), View.Marked("long", View.text(s"#$zw${"0" * 20}$zw${"0" * 20}$zw")))
+            assertEquals(v.rows(1)(0), View.Marked("long", View.text(s"#$zw${"0" * 12}$zw${"0" * 12}$zw${"0" * 12}$zw${"0" * 4}")))
             assertEquals(OnFaces.breakable("a_b.c"), s"a_${zw}b.${zw}c")
             assertEquals(OnFaces.breakable("ScriptContext"), s"Script${zw}Context")
           case None => fail("no table")
