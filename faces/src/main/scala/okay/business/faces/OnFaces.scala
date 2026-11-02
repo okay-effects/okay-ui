@@ -72,7 +72,7 @@ object OnFaces:
       .groupBy(_._1.slot.get)
 
   /** a table's cell: a word too long for a narrow screen (a hash, a term, a qualified name) given places to break —
-   * zero-width spaces after its separators and every 10 letters in a row — so a cell breaks between words, and inside
+   * zero-width spaces where it reads apart (breakable) — so a cell breaks between words, and inside
    * a long word only; marked `long` when it has one */
   private def cell(text: String): View =
     // runs of spaces and of the rest, kept (no look-behind: Scala.js targets ES2015 regexes)
@@ -88,14 +88,17 @@ object OnFaces:
 
   private val separators = "_.-'()[],:/=#"
 
-  /** `w` with a zero-width space after each separator and inside every 10 other characters in a row */
+  /** `w` with zero-width spaces where it reads apart: after a separator, before an upper-case letter after a lower-case
+   * one (ScriptContext \u2192 Script\u00b7Context), and inside a run of 20 with neither (a hash) */
   def breakable(w: String): String =
     val b = StringBuilder()
     var run = 0
-    w.foreach { c =>
+    w.indices.foreach { i =>
+      val c = w(i)
+      if i > 0 && c.isUpper && w(i - 1).isLower then { b += '\u200b'; run = 0 }
       b += c
       if separators.contains(c) then { b += '\u200b'; run = 0 }
-      else { run += 1; if run >= 10 then { b += '\u200b'; run = 0 } }
+      else { run += 1; if run >= 20 then { b += '\u200b'; run = 0 } }
     }
     b.toString
 
