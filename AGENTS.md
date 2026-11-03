@@ -33,5 +33,7 @@ spec first.
   implementation a handler, one line per environment. Keep its mains one line each.
 - A module's Scala.js settings go in `.whenJs(...)` (project/WhenJs.scala), never `.jsSettings`: without
   `-Dplatforms=js` there is no JS project, and `jsSettings` stops the build from loading.
+- Scala Native (`-Dplatforms=native`): `core`, `scala3`, `faces` — what a phone runs under okay-faces' mobile face
+  (okay-remote's iPhone app); `faces`' tests on the JVM alone (okay-faces' test face is not published for Native).
 - `sbt test`. Lines at most 120 wide. Commits: plain messages,
   no attribution trailers.

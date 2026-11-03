@@ -29,14 +29,18 @@ val platformsAsked: Set[String] =
 // a module's Scala.js settings are `.whenJs(...)` (project/WhenJs.scala): set only when Scala.js is asked
 val platforms: Seq[sbtcrossproject.Platform] =
   Seq[sbtcrossproject.Platform](JVMPlatform) ++ (if (platformsAsked("js")) Seq(JSPlatform) else Nil)
+/** Scala Native as well, when asked, for what a phone runs (okay-faces' mobile face): the model, okay-scala's kernel,
+ * the screens on okay-faces — pure Scala, no code of a platform's */
+val phonePlatforms: Seq[sbtcrossproject.Platform] =
+  platforms ++ (if (platformsAsked("native")) Seq(NativePlatform) else Nil)
 val munit = Def.setting("org.scalameta" %%% "munit" % "1.2.3" % Test)
 
 /** THE MODEL, THE EFFECT, THE KERNEL'S WORDS: no dependency */
-lazy val core = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("core"))
+lazy val core = crossProject(phonePlatforms: _*).crossType(CrossType.Pure).in(file("core"))
   .settings(name := "okay-ui-core", libraryDependencies += munit.value)
 
 /** on okay-scala's machine: `import okay.business.scala3.*` */
-lazy val scala3Kernel = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("scala3"))
+lazy val scala3Kernel = crossProject(phonePlatforms: _*).crossType(CrossType.Pure).in(file("scala3"))
   .dependsOn(core)
   .settings(name := "okay-ui-scala3", libraryDependencies += "io.github.okay-effects" %%% "okay-scala" % okayScala)
 
@@ -57,12 +61,15 @@ ThisBuild / resolvers += "okay-mcp" at "https://okay-effects.github.io/okay-mcp/
 
 /** THE SCREENS ON OKAY-FACES: every face of it — terminal, HTML, Swing, Laminar, MCP — runs a business program; on
  * okay-scala's machine, through okay-simple's adapter: `import okay.effects.cek.OnCek.self` */
-lazy val faces = crossProject(platforms: _*).crossType(CrossType.Pure).in(file("faces"))
+lazy val faces = crossProject(phonePlatforms: _*).crossType(CrossType.Pure).in(file("faces"))
   .dependsOn(core)
   .settings(name := "okay-ui-faces",
     libraryDependencies ++= Seq("io.github.okay-effects" %%% "okay-faces" % okayFaces,
-      "io.github.okay-effects" %%% "okay-effects-cek" % okayEffectsCek,
-      "io.github.okay-effects" %%% "okay-faces-test" % okayFaces % Test, munit.value))
+      "io.github.okay-effects" %%% "okay-effects-cek" % okayEffectsCek, munit.value),
+    // its tests play okay-faces' test face, not published for Native: on a phone's build, none (they run on the JVM)
+    libraryDependencies ++= (if (crossProjectPlatform.value == NativePlatform) Nil
+      else Seq("io.github.okay-effects" %%% "okay-faces-test" % okayFaces % Test)),
+    Test / sources := (if (crossProjectPlatform.value == NativePlatform) Nil else (Test / sources).value))
 
 /** THE EXAMPLE, written once on okay-scala; its copies on okay-simple's machine and Free made by changing the import
  * line (and the package) alone — the proof that the kernel is the import. The shop and its scripted tests shared; at a
