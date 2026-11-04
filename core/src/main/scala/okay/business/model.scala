@@ -63,6 +63,9 @@ object model:
     /** a file's text: chosen or dropped where a face can, pasted where it cannot; `accept` as a browser takes it
      * (".json,.plutus", "application/json"), empty for any */
     case File(accept: String)
+    /** several files, each its path and its text, as a bundle (`Bundle`): a folder chosen where a face can, pasted
+     * where it cannot; `accept` the endings a folder's files are read by, empty for all */
+    case Files(accept: String)
     /** the options' keys and labels */
     case Choice(options: List[(String, String)])
 
@@ -86,6 +89,41 @@ object model:
       Field[Option[A]](key, label, kind, hint, initial, e => if e.isBlank then Right(None) else read(e).map(Some(_)),
         _.fold(Entry.Blank)(write), required = false, held = held)
 
+  /**
+   * SEVERAL FILES AS ONE TEXT (spec, "Many files"): each a line `==> path <==` and its text, the files apart by an
+   * empty line — what `tail -n +1` prints for several files. Read back the same: text before the first header is
+   * one file with no name; a file's text ends where the empty line before the next header begins.
+   */
+  object Bundle:
+    private val header = "^==> (.*) <==$".r
+
+    def write(files: List[(String, String)]): String =
+      files.map((path, text) =>
+        s"==> $path <==\n" + (if text.isEmpty || text.endsWith("\n") then text else text + "\n"))
+        .mkString("\n")
+
+    def read(text: String): List[(String, String)] =
+      val lines = text.split("\n", -1).toList
+      val out = List.newBuilder[(String, String)]
+      var path: Option[String] = None
+      val body = StringBuilder()
+      def flush(next: Boolean): Unit =
+        // the empty line that parts it from the next file is not its
+        val t = body.result()
+        val own = if next && t.endsWith("\n\n") then t.dropRight(1) else t
+        path match
+          case Some(p) => out += p -> own
+          case None => if own.trim.nonEmpty then out += "" -> own
+        body.clear()
+      lines.zipWithIndex.foreach { (l, i) =>
+        l match
+          case header(p) => flush(next = true); path = Some(p)
+          case _ => body ++= l; if i < lines.size - 1 then body += '\n'
+      }
+      flush(next = false)
+      out.result()
+
+
   object Field:
     /** a key from a label: lowercase, dashes for spaces, the rest dropped */
     def keyOf(label: String): String =
@@ -106,6 +144,11 @@ object model:
      * pasted; `accept` the kinds a browser's chooser offers, empty for any */
     def file(label: String, accept: String = ""): Field[String] =
       required[String](label, Kind.File(accept), Entry.Text(_))(e => Right(e.text))
+    /** MANY FILES: a folder, or several — each its path and its text; a page offers to choose folders and files (each
+     * choice added), any face takes a bundle pasted (`Bundle`) */
+    def files(label: String, accept: String = ""): Field[List[(String, String)]] =
+      required[List[(String, String)]](label, Kind.Files(accept), fs => Entry.Text(Bundle.write(fs)))(e =>
+        Right(Bundle.read(e.text)))
     def secret(label: String): Field[String] = required[String](label, Kind.Secret, Entry.Text(_))(e => Right(e.text))
     def whole(label: String): Field[Long] = required[Long](label, Kind.Whole, n => Entry.Number(BigDecimal(n)))(e =>
       number(e).flatMap(n => if n.isWhole && n.isValidLong then Right(n.toLong) else Left("a whole number")))

@@ -234,6 +234,18 @@ chooser ("Choose a file…", `accept` passed to the browser) beside its text are
 file's text read into the area (`FilePicking`), where the face reads it when the form is sent. okay-faces' markup is
 untouched: the chooser is added after the face has drawn (`OnFaces.files(screen)` names the areas).
 
+## Many files: a folder, or several (2026-11-04)
+
+`Field.files(label, accept)` (`Kind.Files`): a field holding several files, each its path and its text — a folder of
+configurations and logs, or several. Its text is a **bundle**, the format `tail -n +1` prints for several files: each file a line
+`==> path <==` and its text (`Bundle.write`, `Bundle.read`; text before the first header is one file with no name). So
+to every face it is long text, as a file's is — a bundle pasted at a terminal, sent by an agent. In a page
+(`FilePicking`) beside its area: "Choose a folder…" (the browser's folder chooser, every file under it, its path from
+the folder chosen) and "Choose files…" (several); the area a drop target for several files. Each choice is **added**
+to what the area holds — a second folder, more files — so several folders go into one field; the area is cleared as
+any text is. `accept` filters the files read from a folder by their endings (`.log,.txt,.yml`), empty for all.
+`OnFaces.bundles(screen)` names the areas, as `OnFaces.files` names a single file's.
+
 ## The clipboard (2026-10-30)
 
 `Clipboard` (in the model): `copy(text)` answers whether the text was copied. Handlers: `copiedTo(buffer)` (a test's),

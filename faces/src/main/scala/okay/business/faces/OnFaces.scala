@@ -183,7 +183,8 @@ object OnFaces:
     b.needs.flatMap {
       case f: Form[?] =>
         val i = screen.input(f)
-        f.fields.filter(f => f.kind == Kind.LongText || f.kind.isInstanceOf[Kind.File])
+        f.fields.filter(f =>
+          f.kind == Kind.LongText || f.kind.isInstanceOf[Kind.File] || f.kind.isInstanceOf[Kind.Files])
           .map(field => if several then s"$i-${field.key}" else field.key)
       case _ => Nil
     }
@@ -198,6 +199,21 @@ object OnFaces:
           val i = screen.input(f)
           f.fields.collect { case field if field.kind.isInstanceOf[Kind.File] =>
             (if several then s"$i-${field.key}" else field.key) -> field.kind.asInstanceOf[Kind.File].accept
+          }
+        case _ => Nil
+      }
+    }.distinct
+
+  /** THE MANY-FILE FIELDS OF A SCREEN (spec, "Many files"), named as `files` names a file's: each its parameter's name
+   * and the endings a folder's files are read by */
+  def bundles(screen: Screen[?]): List[(String, String)] =
+    screen.buttons.flatMap { b =>
+      val several = b.needs.size > 1
+      b.needs.flatMap {
+        case f: Form[?] =>
+          val i = screen.input(f)
+          f.fields.collect { case field if field.kind.isInstanceOf[Kind.Files] =>
+            (if several then s"$i-${field.key}" else field.key) -> field.kind.asInstanceOf[Kind.Files].accept
           }
         case _ => Nil
       }
@@ -242,7 +258,7 @@ object OnFaces:
   def shapeOf[A](field: Field[A], name: String): Shape.Field[Entry] =
     val checked: Entry => Either[String, Entry] = e => field.read(e).map(_ => e)
     val base: Shape[Entry] = field.kind match
-      case Kind.Text | Kind.LongText | Kind.Secret | Kind.File(_) =>
+      case Kind.Text | Kind.LongText | Kind.Secret | Kind.File(_) | Kind.Files(_) =>
         Shape.text.refine(s => checked(Entry.Text(s)))(_.text)
       case Kind.Whole | Kind.Decimal | Kind.Money(_) =>
         Shape.number.refine(n => checked(Entry.Number(n))) {

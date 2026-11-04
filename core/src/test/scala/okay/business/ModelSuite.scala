@@ -58,3 +58,13 @@ class ModelSuite extends munit.FunSuite:
     assertEquals(Play(asked, Act.press("Go", "Name" -> "Ann")), Played(Some("Ann"), List("Who?"), Nil, None))
     val stuck = Play(asked, Act.press("Never mind"), Act.press("Go"))
     assertEquals((stuck.result, stuck.seen, stuck.problems.map(_.message)), (None, List("Who?", "Who?"), List("required")))
+
+  test("many files (spec, \"Many files\"): a bundle read back as written; tail's output read; a field of them"):
+    val files = List("conf/arch.txt" -> "web: service entry\n", "logs/web.log" -> "line 1\n\nline 3\n",
+      "empty.txt" -> "")
+    assertEquals(Bundle.read(Bundle.write(files)), files)
+    assertEquals(Bundle.read("==> a.log <==\nx\n\n==> b.log <==\ny\n"), List("a.log" -> "x\n", "b.log" -> "y\n"))
+    assertEquals(Bundle.read("just text\n"), List("" -> "just text\n"))
+    val f = Field.files("A folder", ".log")
+    assertEquals(f.kind, Kind.Files(".log"))
+    assertEquals(f.read(Entry.Text(Bundle.write(files))), Right(files))

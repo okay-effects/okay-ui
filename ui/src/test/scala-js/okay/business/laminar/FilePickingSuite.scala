@@ -30,3 +30,24 @@ class FilePickingSuite extends munit.FunSuite:
     FilePicking.fill(area, """{"cborHex": "84a4"}""")
     assertEquals(area.value, """{"cborHex": "84a4"}""")
     running.cancel()
+
+  test("many files (spec, \"Many files\"): a folder chooser and a files chooser, once; each choice added as a bundle"):
+    val many = Form.one(Field.files("Folder", ".log,.txt"))
+    val s = Screen[List[(String, String)]]("Folders")(many)(Button.submit("Read", many)(identity))
+    assertEquals(OnFaces.bundles(s), List("folder" -> ".log,.txt"))
+    dom.document.body.innerHTML = ""
+    val root = dom.document.createElement("div")
+    dom.document.body.appendChild(root)
+    type Page[X] = (Async + Ui)[X]
+    val running = Async.start(Laminar.run(root)(show[List[(String, String)], Page](s)))
+    FilePicking.attachBundles(root, s)
+    FilePicking.attachBundles(root, s)
+    val labels = root.querySelectorAll("label.okay-file")
+    assertEquals(labels.length, 2)
+    assert(root.querySelector("label.okay-file input[webkitdirectory]") != null, root.innerHTML)
+    val area = root.querySelector("textarea#f-folder").asInstanceOf[dom.HTMLTextAreaElement]
+    FilePicking.add(area, List("a/web.log" -> "x\n"))
+    FilePicking.add(area, List("b/db.log" -> "y\n"))
+    assertEquals(okay.business.model.Bundle.read(area.value), List("a/web.log" -> "x\n", "b/db.log" -> "y\n"))
+    assert(FilePicking.accepted("logs/web.LOG", ".log,.txt") && !FilePicking.accepted("x.png", ".log,.txt"))
+    running.cancel()
