@@ -69,6 +69,11 @@ chosen by ONE import.
    steps), at its next wait. The handlers do it by intercepting `Async` around the program once, so each wait can be
    raced with the exit; the interception stays one deep however often a person leaves. With the deprecated
    `Lifted[Future]` a future cannot be cancelled: no exit is shown.
+   A screen with events (`Screen.until`) is answered in a page by its first event as a button would be, and from then
+   not listened to — even while the program goes on to work of its own before its next screen (okay-faces' faces stop
+   listening at once, 2026-11-04); a press first stops the listening too (`EventsSuite`, under jsdom). So a page whose
+   world answers later, a socket's messages as events and a search's work as `Async`, is one program run by
+   `Laminar.run`.
    In a test the same program is `steps` and `Play`: `Act.leave(label)` presses an exit on the next working screen
    that has it, and the script goes on from the block's end; any other act lets working screens go on.
 
