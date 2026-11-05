@@ -153,9 +153,13 @@ object Skin:
       |  background: color-mix(in srgb, var(--okay-accent) 16%, transparent);
       |  box-shadow: inset 3px 0 0 var(--okay-accent); }
       |/* a file field (Field.file): its chooser under the text area, the area a drop target */
-      |body label.okay-file { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px;
-      |  color: var(--okay-accent); font-weight: 600; cursor: pointer; }
-      |body label.okay-file input[type="file"] { font: inherit; color: var(--okay-muted); }
+      |body label.okay-file { display: inline-flex; align-items: center; gap: 8px; margin: 6px 8px 0 0; padding: 6px 12px;
+      |  color: var(--okay-accent); font-weight: 600; cursor: pointer; border: 1px solid var(--okay-border);
+      |  border-radius: 10px; background: var(--okay-surface); position: relative; }
+      |/* the native input is there for the click and the files, not for the eye: its own words ("Choose Files",
+      |   "No file chosen") say the wrong thing for a folder */
+      |body label.okay-file input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0;
+      |  overflow: hidden; pointer-events: none; }
       |/* text as written (Part.code): lines kept, monospace, the current ones marked */
       |body .okay-mark-code { display: block; }
       |/* lines one under the other, no group gap between them (a group's 12px gap made code double-spaced) */

@@ -245,6 +245,9 @@ the folder chosen) and "Choose files…" (several); the area a drop target for s
 to what the area holds — a second folder, more files — so several folders go into one field; the area is cleared as
 any text is. `accept` filters the files read from a folder by their endings (`.log,.txt,.yml`), empty for all.
 `OnFaces.bundles(screen)` names the areas, as `OnFaces.files` names a single file's.
+The choosers look like buttons (the skin, 2026-11-05): the words alone — "Choose a file…", "Choose a folder…",
+"Choose files…" — the native input hidden under them, since its own words ("Choose Files", "No file chosen") say the
+wrong thing for a folder and were drawn twice beside the label's.
 
 ## The clipboard (2026-10-30)
 
