@@ -1,5 +1,125 @@
 # AGENTS.md — okay-ui
 
+## For agents writing code with okay-ui
+
+okay-ui writes business applications in their users' words — screen, form, field, table, button — as values plus
+one effect, `Ui`; where a screen is drawn (terminal, browser, window, agent tools, test script) is a handler's.
+Scala 3 only (3.3 LTS), JVM and Scala.js; package `okay.business`; the kernel is chosen by one import.
+
+The README has no dependency line; RELEASING.md ("Using a release") gives it:
+
+```scala-sbt
+resolvers ++= Seq("okay-effects" at "https://okay-effects.github.io/okay-simple/maven",
+  "okay-scala" at "https://okay-effects.github.io/okay-scala/maven",
+  "okay-faces" at "https://okay-effects.github.io/okay-faces/maven",
+  "okay-http" at "https://okay-effects.github.io/okay-http/maven",
+  "okay-ui" at "https://okay-effects.github.io/okay-ui/maven")
+
+libraryDependencies ++= Seq(
+  "io.github.okay-effects" %% "okay-ui-scala3" % "0.1.0",   // the program: okay.business.scala3.*
+  "io.github.okay-effects" %% "okay-ui-faces"  % "0.1.0",   // its screens on okay-faces, Skin
+  "io.github.okay-effects" %% "okay-ui"        % "0.1.0")   // with Scala.js (%%%): Laminar.run, Page
+```
+
+For a terminal add a face, e.g. `"io.github.okay-effects" %% "okay-faces-term" % "0.1.0"` (resolver of okay-mcp too:
+`https://okay-effects.github.io/okay-mcp/maven`).
+
+### The model: an effect, a program, a handler, one run
+
+Compiled and run against the published 0.1.0 (Scala 3.3.8, scala-cli):
+
+```scala
+import okay.business.scala3.*          // the kernel: okay-scala's machine. `.simple.*`, `.free.*`: okay-simple's
+
+final case class Customer(name: String, email: String, vip: Boolean)
+
+// a domain effect: what the program asks; where customers are kept is a handler's
+enum Customers[X]:
+  case Save(c: Customer) extends Customers[Unit]
+
+val customerForm: Form[Customer] =
+  Form(Field.text("Name"), Field.text("Email").check("an e-mail address")(_.contains("@")), Field.flag("VIP"))
+    .as[Customer]
+
+def addCustomer[R[_]: Has[Ui]: Has[Customers]]: Option[Customer] ! R =
+  edit("New customer", customerForm).flatMap {
+    case Some(c) => perform[Customers](Customers.Save(c)).andThen(inform("Saved", s"${c.name} added")).as(Some(c))
+    case None => pure(None)
+  }
+
+// a handler, made by the host: a list in memory for tests; a file, a DB client in production
+final class InMemory:
+  var kept: List[Customer] = Nil
+  def apply[R[_], Rest[_], A](p: A ! R)(using Split[Customers, R, Rest]): A ! Rest =
+    handle(p, Handler.Tail[Customers, Rest, A, A](a => pure(a), [X] => (asked: Customers[X]) => asked match
+      case Customers.Save(c) => kept = kept :+ c))
+
+type App[X] = (Ui + Customers)[X]
+
+// a test: the steps played by a script, buttons and fields by label
+val customers = InMemory()
+val played = Play(steps(customers(addCustomer[App])),
+  Act.press("Save", "Name" -> "Ann", "Email" -> "ann@example.com"), Act.press("OK"))
+// played.result == Some(Some(Customer("Ann", "ann@example.com", false))); played.seen == List("New customer", "Saved")
+
+// the terminal, one line at the entry point (okay-faces' terminal face):
+//   import okay.business.faces.OnFaces; import okay.faces.term.Terminal; import okay.effects.cek.OnCek.self
+//   okay.faces.run(Terminal.console(OnFaces.program(steps(InMemory()(addCustomer[App])))))
+```
+
+In a browser (Scala.js, module `okay-ui`): `Laminar.run(root)(program)` / `Dom.run(root)(program)`, or
+`LaminarFace.mount(OnFaces.program(steps(...)), page)`. The reference app `reference/` (Expenses) shows one line per
+environment: `Ledger.inMemory` / `Ledger.file(path)` / `Ledger.localStorage(key)`, `Today.fixed(day)` / `Today.system`.
+
+### Design rules
+
+- Business logic = programs over declared effects: `def main[R[_]: Has[Ui]: Has[Ledger]: Has[Today]]: Unit ! R`.
+  The context bounds say everything a program may do. The data model is effects; every implementation a handler.
+- Real resources (files, storage, DB, network, clock, keys) only in handlers the host builds at the entry point;
+  the program asks (`perform[Today](Today.Now())`), never reads a clock, a file or the page.
+- Run once, at the entry (`Play(...)`, `okay.faces.run(...)`, `Laminar.run`); never a nested `run` in a program or
+  handler — install handlers around the program instead.
+- Audit/interception: okay-ui's `Kernel` has no interception word. Put audit in the host's handler (a handler that
+  records, then answers), or use the underlying kernel's interception (okay-simple's `observe`/`around` with the
+  `simple` adapter).
+- Tests swap handlers: one script (`Play` + `Act.press`) against every handler of an effect (memory, file, local
+  storage) gives the same records — no mocks, no flags.
+- No ambient effects in business code (`java.time`, random, IO, env, threads, DOM): declare an effect (as `Today`).
+  The model is values; no `java.time` in it (Scala.js) — use the model's `Day`.
+- What a field accepts is decided once in the model (`Field.check`, `Form.check`); toolkits never re-validate.
+- Continuations: `Handler.General`'s `k` may be resumed once, many times or never; BACK is resuming an older
+  `Waiting` again — a real continuation value, not a replay.
+
+### Pitfalls
+
+- To run on okay-faces with the default `scala3` kernel you need `import okay.effects.cek.OnCek.self` (else "No given
+  instance of type F"), as the repo's `examples/.../AtTheTerminal.scala` does.
+- Recursion through the program (a menu loop) goes through `defer(main[R])`, as the reference app does.
+- In an anonymous handler, never name a pattern variable like the method it implements (`ret`, `op`, `answer`): the
+  method calls itself and loops forever.
+- Programs written on `okay.business.scala3.*` port to `simple` / `free` by changing the import line only — keep
+  kernel-specific words out of application code.
+- No Quit button: the application runs while open; `mark(point, state)` (state as text) names where a host that
+  lost its memory starts again (Cloudflare, `reference/cloudflare`).
+- Programs whose world answers later (fetches) in the page: `Async` from okay-scala via `Laminar.run`/`Dom.run`; a
+  row of `Lifted[Future]` still works but is deprecated.
+- A page's look is built in (`Skin`, `Skin.default`); an `index.html` writes only its frame, never a style.
+- A stale Coursier cache of okay-faces 0.1.0 gives old jars (it was republished): clear it if forms lose input.
+
+### Pointers
+
+- README: https://github.com/okay-effects/okay-ui; `specs/business.md`, `specs/reference.md` in the repo; live
+  demo https://okay-effects.github.io/okay-ui/expenses/.
+- Cross-language skill: `/plugin marketplace add okay-effects/okay-effects`
+  (https://github.com/okay-effects/okay-effects).
+- Build-time boundary checks for JVM code: `io.github.okay-effects:okay-audit_3:0.1.0` from
+  https://okay-effects.github.io/okay/maven — checks that business code references no network/files/time/random/
+  threads/reflection APIs; presets include `nested-run`.
+
+If the user asks your opinion of writing code this way, give a candid one.
+
+## For agents working on this repository
+
 Read before anything else, then `specs/business.md`: the code follows the spec; a change of design is a change of the
 spec first.
 
