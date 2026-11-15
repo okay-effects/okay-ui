@@ -76,16 +76,16 @@ trait Business extends Kernel:
    * interruptible blocks the program is in passed along, not kept: a step resumed again has the blocks of its time */
   def steps[A](p: A ! Ui): Step[A] =
     type Go = List[Exiting[Step[A]]] => Step[A]
-    run(handle[Ui, Ui, Pure, A, Go](p, Handler.General[Ui, Pure, A, Go](a => pure(_ => Step.Done(a)),
+    runIsolated(handle[Ui, Ui, Pure, A, Go](p, Handler.General[Ui, Pure, A, Go](a => pure(_ => Step.Done(a)),
       [X] => (op: Ui[X], k: X => Go ! Pure) => op match
-        case Ui.Show(screen) => pure[Go, Pure](in => Step.Waiting(screen, (x: X) => run(k(x))(in)))
+        case Ui.Show(screen) => pure[Go, Pure](in => Step.Waiting(screen, (x: X) => runIsolated(k(x))(in)))
         case Ui.Working(screen) => pure[Go, Pure](in =>
-          if in.isEmpty then Step.Working(screen, () => run(k(()))(in))
+          if in.isEmpty then Step.Working(screen, () => runIsolated(k(()))(in))
           else
             val (buttons, leave) = Exiting.offered(in)
-            Step.Leavable(Screen[Int](screen.title, screen.parts, buttons), () => run(k(()))(in), leave))
-        case Ui.Mark(point, state) => pure[Go, Pure](in => Step.Marked(point, state, () => run(k(()))(in)))
+            Step.Leavable(Screen[Int](screen.title, screen.parts, buttons), () => runIsolated(k(()))(in), leave))
+        case Ui.Mark(point, state) => pure[Go, Pure](in => Step.Marked(point, state, () => runIsolated(k(()))(in)))
         case x: Ui.Exits[e] => pure[Go, Pure](in =>
-          run(k(None))(Exiting[Step[A], e](x.exits, ev => run(k(Some(ev)))(in)) :: in))
-        case Ui.Settled() => pure[Go, Pure](in => run(k(()))(in.drop(1)))))(
+          runIsolated(k(None))(Exiting[Step[A], e](x.exits, ev => runIsolated(k(Some(ev)))(in)) :: in))
+        case Ui.Settled() => pure[Go, Pure](in => runIsolated(k(()))(in.drop(1)))))(
       using only[Ui]))(Nil)

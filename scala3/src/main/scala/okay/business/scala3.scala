@@ -21,3 +21,4 @@ object scala3 extends Business:
       case Handler.General(ret, op) => k.Handler.General[E, Rest, A, B](ret, op)
       case Handler.Tail(ret, answer) => k.Handler.Tail[E, Rest, A, B](ret, answer))
   def run[A](p: A ! Pure): A = k.run(p)
+  override def runIsolated[A](p: A ! Pure): A = k.runIsolated(p)

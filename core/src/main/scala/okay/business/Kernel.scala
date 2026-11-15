@@ -38,6 +38,10 @@ trait Kernel:
   def handle[E[_], R[_], Rest[_], A, B](p: A ! R, h: Handler[E, Rest, A, B])(using Split[E, R, Rest]): B ! Rest
   /** a program of no effect, run */
   def run[A](p: A ! Pure): A
+  /** a program of no effect, run to its end as a run of its own, ON PURPOSE: where a run may be begun while another
+   * goes on on the same thread — a step resumed by a toolkit from inside its own program. A kernel that refuses a
+   * nested run (okay-scala, `NestedRun`) lets this one through; elsewhere it is `run` */
+  def runIsolated[A](p: A ! Pure): A = run(p)
 
   /** `perform[Ui](Ui.Show(screen))`: the effect said, the answer from the operation, the row from what is expected */
   final def perform[E[_]]: Performing[E] = Performing[E]()
