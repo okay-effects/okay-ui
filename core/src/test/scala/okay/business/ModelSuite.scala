@@ -18,6 +18,12 @@ class ModelSuite extends munit.FunSuite:
     assertEquals(Field.flag("VIP").read(Entry.Blank), Right(false))
     assertEquals(Field.choice("Size", "Small" -> 1, "Large" -> 2).read(Entry.Text("large")), Right(2))
     assertEquals(Field.choice("Size", "Small" -> 1, "Large" -> 2).read(Entry.Pick("small")), Right(1))
+    // labels whose keys would be the same ("22% (US)", "24% (US)" are both "us"): each its own
+    val rates = Field.choice("Rate", "22% (US)" -> 0.22, "24% (US)" -> 0.24, "35% (US)" -> 0.35)
+    assertEquals(rates.write(0.24), Entry.Pick("us-2"))
+    assertEquals(rates.read(rates.write(0.24)), Right(0.24))
+    assertEquals(rates.read(rates.write(0.35)), Right(0.35))
+    assertEquals(rates.read(Entry.Text("24% (us)")), Right(0.24))
     assertEquals(Field.text("Email").check("an e-mail address")(_.contains("@")).read(Entry.Text("x")),
       Left("an e-mail address"))
     assertEquals(Field.text("Full name").key, "full-name")

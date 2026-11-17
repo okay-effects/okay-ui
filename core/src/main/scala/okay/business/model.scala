@@ -186,7 +186,11 @@ object model:
       }, b => Entry.Flag(b), required = false)
     /** one of the options, each a label and its value; chosen by key or by label */
     def choice[A](label: String, options: (String, A)*): Field[A] =
-      val keyed = options.toList.map((l, a) => (keyOf(l), l, a))
+      // each option's key unique in its choice: a label's key drops its leading digits ("22% (US)" and "24% (US)"
+      // are both "us"), so a repeated key takes the option's place (found 2026-11-17: the second was never chosen)
+      val keys = options.toList.map((l, _) => keyOf(l))
+      val unique = keys.zipWithIndex.map((k, i) => if keys.indexOf(k) == i then k else s"$k-${i + 1}")
+      val keyed = options.toList.zip(unique).map { case ((l, a), k) => (k, l, a) }
       required[A](label, Kind.Choice(keyed.map((k, l, _) => (k, l))),
         a => keyed.find(_._3 == a).fold(Entry.Blank)(o => Entry.Pick(o._1))) { e =>
         val t = e.text.trim
