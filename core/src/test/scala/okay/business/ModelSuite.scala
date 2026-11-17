@@ -68,3 +68,12 @@ class ModelSuite extends munit.FunSuite:
     val f = Field.files("A folder", ".log")
     assertEquals(f.kind, Kind.Files(".log"))
     assertEquals(f.read(Entry.Text(Bundle.write(files))), Right(files))
+
+  test("a field's key from a label in Polish, Russian or Ukrainian: spelled in Latin letters, the keys distinct") {
+    assertEquals(Field.keyOf("Co miesiąc"), "co-miesiac")
+    assertEquals(Field.keyOf("Счёт"), "schet")
+    assertEquals(Field.keyOf("Щомісяця"), "shchomisyatsya")
+    assertEquals(Field.keyOf("П'ять"), "pyat")
+    val labels = Vector("Горизонт, лет", "На старте", "Каждый месяц", "Счёт")
+    assertEquals(labels.map(Field.keyOf).distinct.size, labels.size)
+  }

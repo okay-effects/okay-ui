@@ -126,9 +126,22 @@ object model:
 
   object Field:
     /** a key from a label: lowercase, dashes for spaces, the rest dropped */
+    /** a field's key from its label: in Latin letters — a label in Polish, German, Russian or Ukrainian spelled so
+     * ("Co miesiąc" → "co-miesiac", "Счёт" → "schet"), not its letters dropped (every Cyrillic label was "field",
+     * and a form of them refused its repeated keys: okay-invest, 2026-11-17) */
     def keyOf(label: String): String =
-      val k = label.trim.toLowerCase.replaceAll("\\s+", "-").replaceAll("[^a-z0-9_-]", "").dropWhile(c => !c.isLetter)
+      val spelled = label.trim.toLowerCase.flatMap(c => latin.getOrElse(c, c.toString))
+      val k = spelled.replaceAll("\\s+", "-").replaceAll("[^a-z0-9_-]", "").dropWhile(c => !c.isLetter)
       if k.isEmpty then "field" else k
+
+    private val latin: Map[Char, String] = Map(
+      'ą' -> "a", 'ć' -> "c", 'ę' -> "e", 'ł' -> "l", 'ń' -> "n", 'ó' -> "o", 'ś' -> "s", 'ź' -> "z", 'ż' -> "z",
+      'ä' -> "ae", 'ö' -> "oe", 'ü' -> "ue", 'ß' -> "ss", 'é' -> "e", 'è' -> "e", 'à' -> "a", 'ç' -> "c",
+      'а' -> "a", 'б' -> "b", 'в' -> "v", 'г' -> "g", 'д' -> "d", 'е' -> "e", 'ё' -> "e", 'ж' -> "zh", 'з' -> "z",
+      'и' -> "i", 'й' -> "i", 'к' -> "k", 'л' -> "l", 'м' -> "m", 'н' -> "n", 'о' -> "o", 'п' -> "p", 'р' -> "r",
+      'с' -> "s", 'т' -> "t", 'у' -> "u", 'ф' -> "f", 'х' -> "kh", 'ц' -> "ts", 'ч' -> "ch", 'ш' -> "sh",
+      'щ' -> "shch", 'ъ' -> "", 'ы' -> "y", 'ь' -> "", 'э' -> "e", 'ю' -> "yu", 'я' -> "ya",
+      'є' -> "ye", 'і' -> "i", 'ї' -> "yi", 'ґ' -> "g", '\'' -> "", '’' -> "")
 
     private def required[A](label: String, kind: Kind, write: A => Entry)(read: Entry => Either[String, A]): Field[A] =
       Field(keyOf(label), label, kind, None, Entry.Blank, e => if e.isBlank then Left("required") else read(e), write,
