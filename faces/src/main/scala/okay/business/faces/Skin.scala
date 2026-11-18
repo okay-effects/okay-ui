@@ -117,6 +117,9 @@ object Skin:
       |  body .okay-actions > .okay-action { flex: 1 1 auto; }
       |  /* a table on a phone: less room around its cells, more for what is in them */
       |  body .okay-table th, body .okay-table td { padding: 9px 8px; }
+      |  /* a table wider than the screen scrolls by itself, not the page (okay-invest's result and tax tables were
+      |     508 and 603 px on a 390 px phone); a cell's text still wraps */
+      |  body table.okay-table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
       |  /* a deep tree and a long text on a phone: a smaller step in, a pane that scrolls, not a page that grows */
       |  body .okay-mark-tree-children { padding-left: 0.6em !important; }
       |  body .okay-mark-tree > .okay-group, body .okay-mark-code > .okay-group { max-height: 70vh; overflow: auto; }
