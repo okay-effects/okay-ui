@@ -48,6 +48,12 @@ object Skin:
       |body .okay-face p.okay-text, body .okay-face .okay-notice { max-width: 78ch; }
       |body .okay-table p.okay-text { max-width: none; }
       |
+      |/* a screen's sections: cards, so that one step ends where the next begins */
+      |body .okay-view > .okay-group > section.okay-group:has(> .okay-group-title) { background: var(--okay-surface);
+      |  border: 1px solid var(--okay-border); border-radius: 14px; box-shadow: var(--ui-shadow); padding: 16px 20px; }
+      |body .okay-view > .okay-group > section.okay-group > .okay-group-title:first-child { margin-top: 0; }
+      |body .okay-view > .okay-group > section.okay-group dl.okay-fields > .okay-pair { background: var(--ui-soft); }
+      |
       |/* a label and its value: tiles — the label small above, the value large; as many in a row as fit */
       |body dl.okay-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px;
       |  margin: 0; }
@@ -65,8 +71,11 @@ object Skin:
       |  border: 1.5px solid var(--okay-accent); color: var(--okay-accent); font-weight: 700; font-size: 0.9em;
       |  background: var(--okay-surface); user-select: none; }
       |body details.okay-mark-help > summary::-webkit-details-marker { display: none; }
+      |/* a title beside a "?" leaves it room */
+      |body .okay-group:has(> details.okay-mark-help) > .okay-group-title { padding-right: 36px; }
       |body .okay-group > details.okay-mark-help > summary, body .okay-face > div > details.okay-mark-help > summary {
       |  position: absolute; top: -6px; right: 0; }
+      |body .okay-view > .okay-group > section.okay-group > details.okay-mark-help > summary { top: 10px; right: 14px; }
       |body details.okay-mark-help[open] > summary { background: var(--okay-accent); color: #ffffff; }
       |body .okay-group > details.okay-mark-help:not([open]) { margin-bottom: -12px; }
       |body details.okay-mark-help > summary:focus-visible {
@@ -148,6 +157,8 @@ object Skin:
       |  body .okay-heading-1 { font-size: 1.6em; }
       |  body .okay-actions > .okay-action { flex: 1 1 auto; }
       |  body dl.okay-fields { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+      |  body .okay-view > .okay-group > section.okay-group:has(> .okay-group-title) { padding: 12px; }
+      |  body .okay-view > .okay-group > section.okay-group > details.okay-mark-help > summary { top: 8px; right: 8px; }
       |  /* a table on a phone: less room around its cells, more for what is in them */
       |  body .okay-table th, body .okay-table td { padding: 9px 8px; }
       |  /* a table wider than the screen scrolls by itself, not the page (okay-invest's result and tax tables were
