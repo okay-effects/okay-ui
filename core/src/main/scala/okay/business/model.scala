@@ -258,6 +258,9 @@ object model:
     /** HELP for what is next to it: closed until asked — in a browser a "?" in its card's corner that opens it in place
      * (the mark "help": okay-faces' Laminar face draws it as details/summary); a face without it shows it as a group */
     def help(title: String)(parts: Part*): Part = Block("help", Some(title), parts.toList)
+    /** THE SCREEN'S ADDRESS, relative ("planner"): in a browser with history on, the URL the screen is shown at (a
+     * visit counter and the back button see the screens); not drawn; a face without addresses ignores it */
+    def path(relative: String): Part = Block("path", None, List(Text(relative)))
     /** TEXT AS WRITTEN — code, a log, a program's term: its lines kept as they are, in the skin's monospace; the lines
      * numbered in `current` (from 0) marked — a debugger's step, a match */
     final case class Code(lines: List[String], current: Set[Int], title: Option[String]) extends Part

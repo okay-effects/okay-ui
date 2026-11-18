@@ -21,3 +21,14 @@ class HelpSuite extends munit.FunSuite:
         assertEquals(cs.toList, List(View.Text("The fall from a top.")))
       case other => fail(s"no help group: $other")
   }
+
+  test("Part.path is the mark `path` around its text: the face's address of the screen") {
+    val screen = Screen[Unit]("Planner")(Part.path("planner"), Part.text("x"))(Button("Back")(()))
+    def find(v: View): Option[View] = v match
+      case m @ View.Marked("path", _) => Some(m)
+      case View.Marked(_, x) => find(x)
+      case View.Group(_, cs) => cs.iterator.map(find).collectFirst { case Some(m) => m }
+      case _ => None
+    assertEquals(find(OnFaces.view(screen, Nil)),
+      Some(View.Marked("path", View.Group(None, Vector(View.Text("planner"))))))
+  }
