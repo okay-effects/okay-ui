@@ -44,6 +44,38 @@ object Skin:
       |body .okay-group-title { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.78em;
       |  margin-top: 12px; }
       |body .okay-link, body .okay-ref { color: var(--okay-accent); font-weight: 600; }
+      |/* a wide screen for tables, charts and tiles; a paragraph kept to a line one reads easily */
+      |body .okay-face p.okay-text, body .okay-face .okay-notice { max-width: 78ch; }
+      |body .okay-table p.okay-text { max-width: none; }
+      |
+      |/* a label and its value: tiles — the label small above, the value large; as many in a row as fit */
+      |body dl.okay-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px;
+      |  margin: 0; }
+      |body dl.okay-fields > .okay-pair { background: var(--okay-surface); border: 1px solid var(--okay-border);
+      |  border-radius: 10px; padding: 10px 12px; min-width: 0; }
+      |body dl.okay-fields > .okay-pair > dt { font-size: 0.72em; }
+      |body dl.okay-fields > .okay-pair > dd { margin: 4px 0 0; padding: 0; font-size: 1.15em; font-weight: 700;
+      |  font-variant-numeric: tabular-nums; overflow-wrap: break-word; }
+      |
+      |/* help: a round "?" in its card's corner; the explanation opens in place, under the card's title */
+      |body .okay-group:has(> details.okay-mark-help), body .okay-face > div:has(> details.okay-mark-help) {
+      |  position: relative; }
+      |body details.okay-mark-help > summary { list-style: none; cursor: pointer; display: inline-flex;
+      |  align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%;
+      |  border: 1.5px solid var(--okay-accent); color: var(--okay-accent); font-weight: 700; font-size: 0.9em;
+      |  background: var(--okay-surface); user-select: none; }
+      |body details.okay-mark-help > summary::-webkit-details-marker { display: none; }
+      |body .okay-group > details.okay-mark-help > summary, body .okay-face > div > details.okay-mark-help > summary {
+      |  position: absolute; top: -6px; right: 0; }
+      |body details.okay-mark-help[open] > summary { background: var(--okay-accent); color: #ffffff; }
+      |body .okay-group > details.okay-mark-help:not([open]) { margin-bottom: -12px; }
+      |body details.okay-mark-help > summary:focus-visible {
+      |  outline: 3px solid color-mix(in srgb, var(--okay-accent) 30%, transparent); outline-offset: 2px; }
+      |body .okay-help-body { background: color-mix(in srgb, var(--okay-accent) 6%, var(--okay-surface));
+      |  border-left: 3px solid var(--okay-accent); border-radius: 8px; padding: 12px 16px; margin-top: 4px;
+      |  max-width: calc(78ch + 32px);
+      |  display: flex; flex-direction: column; gap: 8px; }
+      |body .okay-help-body > .okay-group-title { margin-top: 0; color: var(--okay-accent); }
       |
       |/* actions: filled for going on, outlined for going back */
       |body .okay-actions { gap: 12px; }
@@ -115,6 +147,7 @@ object Skin:
       |  body .okay-face { padding: 20px 16px 36px; }
       |  body .okay-heading-1 { font-size: 1.6em; }
       |  body .okay-actions > .okay-action { flex: 1 1 auto; }
+      |  body dl.okay-fields { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
       |  /* a table on a phone: less room around its cells, more for what is in them */
       |  body .okay-table th, body .okay-table td { padding: 9px 8px; }
       |  /* a table wider than the screen scrolls by itself, not the page (okay-invest's result and tax tables were
@@ -194,7 +227,7 @@ object Skin:
       |  --ui-soft: color-mix(in srgb, var(--ui-accent) 10%, var(--okay-surface));
       |  --okay-font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
       |  --okay-mono: ui-monospace, "SF Mono", Menlo, monospace;
-      |  --okay-size: 16px; --okay-space: 8px; --okay-measure: 880px;
+      |  --okay-size: 16px; --okay-space: 8px; --okay-measure: 1120px;
       |  ${if scheme == Scheme.Dark then dark else light}
       |}
       |""".stripMargin

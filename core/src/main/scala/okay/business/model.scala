@@ -255,6 +255,9 @@ object model:
     final case class Block(mark: String, title: Option[String], parts: List[Part]) extends Part
     def block(mark: String, title: String = "")(parts: Part*): Part =
       Block(mark, Option(title).filter(_.nonEmpty), parts.toList)
+    /** HELP for what is next to it: closed until asked — in a browser a "?" in its card's corner that opens it in place
+     * (the mark "help": okay-faces' Laminar face draws it as details/summary); a face without it shows it as a group */
+    def help(title: String)(parts: Part*): Part = Block("help", Some(title), parts.toList)
     /** TEXT AS WRITTEN — code, a log, a program's term: its lines kept as they are, in the skin's monospace; the lines
      * numbered in `current` (from 0) marked — a debugger's step, a match */
     final case class Code(lines: List[String], current: Set[Int], title: Option[String]) extends Part
