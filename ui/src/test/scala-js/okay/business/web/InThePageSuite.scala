@@ -23,3 +23,14 @@ class InThePageSuite extends munit.FunSuite:
     assertEquals(run(InThePage.address(whereOpened[App])), List("ru", "дом"))
     run(InThePage.address(nowAt[App](Nil)))
     assertEquals(dom.window.location.hash, "")
+
+  test("an address in the URL's path under a root: opened where it says, the query kept; outside the root none"):
+    type App[X] = Address[X]
+    dom.window.history.pushState(null, "", "/okay-invest/learn-risk?lang=pl")
+    assertEquals(InThePage.directory, "/okay-invest/")
+    assertEquals(run(InThePage.addressInPath()(whereOpened[App])), List("learn-risk"))
+    run(InThePage.addressInPath("/okay-invest/")(nowAt[App](List("planner"))))
+    assertEquals(dom.window.location.pathname + dom.window.location.search, "/okay-invest/planner?lang=pl")
+    run(InThePage.addressInPath("/okay-invest/")(nowAt[App](Nil)))
+    assertEquals(dom.window.location.pathname, "/okay-invest/")
+    assertEquals(run(InThePage.addressInPath("/elsewhere/")(whereOpened[App])), Nil)

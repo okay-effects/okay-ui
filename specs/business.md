@@ -274,7 +274,10 @@ exists. Handlers: `addressed(path, went)` (a test's: opened at `path`, every pla
 (the URL's fragment, `#/ru/pesel/who=ua`: never sent to a server, so a static host serves every link; each new
 place a new entry of the history, the same place said again none). `InThePage.onBack(again)`: Back, Forward, or a
 link of the page opened in it — the program started again, opened where the URL now says. `Address.fragment`,
-`Address.path`: the path as a fragment and back.
+`Address.path`: the path as a fragment and back. `InThePage.addressInPath(root)`: the address in the URL's path under
+`root` (by default the page's directory), the query kept — what a visit counter sees; a static host answers every
+such path with the page (GitHub Pages: the page copied as `404.html`). Second user: okay-invest (its textbook's
+chapters, `/okay-invest/learn-risk`), whose screens keep `Part.path` and the face's Back.
 
 Beside `Part.path` (a screen's own URL, drawn by the face with `browserHistory`): that one names a screen for the
 history and a visit counter; `Address` is the program's — it reads where it was opened. First user: okay-migrant.

@@ -39,6 +39,29 @@ object InThePage:
           val here = dom.window.location.pathname + dom.window.location.search
           dom.window.history.pushState(null, "", if fragment.isEmpty then here else fragment)))
 
+  /** `Address` in the URL's PATH under `root` (`/okay-invest/` + `learn-risk`): the address a visit counter sees and
+   * a server is asked for — a static host must answer every such path with the page (GitHub Pages: a copy of it as
+   * `404.html`). Opened where the path says, the query kept; a new place pushed as a new entry of the history.
+   * `root` defaults to the page's directory: an address of one segment, as the page's own files are relative */
+  def addressInPath[R[_], Rest[_], A](root: String = directory)(p: A ! R)(
+    using Split[okay.business.model.Address, R, Rest]): A ! Rest =
+    import okay.business.model.Address
+    def decode(s: String) = scalajs.js.URIUtils.decodeURIComponent(s)
+    handle(p, Handler.tail[Address, Rest, A, A](a => pure(a))([X] => (asked: Address[X]) => asked match
+      case Address.Opened() =>
+        val path = dom.window.location.pathname
+        if path.startsWith(root) then path.drop(root.length).split('/').toList.filter(_.nonEmpty).map(decode)
+        else Nil
+      case Address.At(path) =>
+        val url = root + path.map(scalajs.js.URIUtils.encodeURIComponent).mkString("/")
+        if dom.window.location.pathname != url then
+          dom.window.history.pushState(null, "", url + dom.window.location.search)))
+
+  /** the page's directory: its path up to the last `/` */
+  def directory: String =
+    val path = dom.window.location.pathname
+    path.take(path.lastIndexOf('/') + 1)
+
   /** `again` when the person goes Back or Forward, or opens a link of this page in it: the program, run again, is
    * opened where the URL now says (`address`) */
   def onBack(again: () => Unit): Unit =
