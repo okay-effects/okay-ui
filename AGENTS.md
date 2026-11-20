@@ -104,6 +104,8 @@ environment: `Ledger.inMemory` / `Ledger.file(path)` / `Ledger.localStorage(key)
 - Programs whose world answers later (fetches) in the page: `Async` from okay-scala via `Laminar.run`/`Dom.run`; a
   row of `Lifted[Future]` still works but is deprecated.
 - A page's look is built in (`Skin`, `Skin.default`); an `index.html` writes only its frame, never a style.
+- A link to every screen: the program says `nowAt(path)` and starts from `whereOpened` (`Address`); in a page
+  `InThePage.address` keeps it in the URL's fragment and `InThePage.onBack(again)` starts the program again on Back.
 - A stale Coursier cache of okay-faces 0.1.0 gives old jars (it was republished): clear it if forms lose input.
 
 ### Pointers

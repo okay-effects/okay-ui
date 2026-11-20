@@ -263,3 +263,18 @@ hides a closed node's children; in a page `TreeToggling` (after `Laminar.run` / 
 by a click on its label and keeps the person's choices by key while the page lives, so the next screen's tree is as
 they left it.
 
+
+## An address: a link to every screen (2026-11-20)
+
+`Address` (in the model): where the application is, as a path — the language, a section, a topic, the answers given —
+so that a link sent to someone opens at the same screen. Words: `whereOpened` (the path the application was opened
+at, empty where none), `nowAt(path)` (said at each screen). The program goes straight to the screen a path names,
+taking what the path gives instead of asking, and shows the nearest screen where a part of an old link no longer
+exists. Handlers: `addressed(path, went)` (a test's: opened at `path`, every place said kept), `InThePage.address`
+(the URL's fragment, `#/ru/pesel/who=ua`: never sent to a server, so a static host serves every link; each new
+place a new entry of the history, the same place said again none). `InThePage.onBack(again)`: Back, Forward, or a
+link of the page opened in it — the program started again, opened where the URL now says. `Address.fragment`,
+`Address.path`: the path as a fragment and back.
+
+Beside `Part.path` (a screen's own URL, drawn by the face with `browserHistory`): that one names a screen for the
+history and a visit counter; `Address` is the program's — it reads where it was opened. First user: okay-migrant.

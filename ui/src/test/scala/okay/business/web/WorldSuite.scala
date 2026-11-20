@@ -42,3 +42,17 @@ class WorldSuite extends munit.FunSuite:
     val p = perform[Fetch][App, Response](Fetch.Call("GET", "https://example.org/", Map.empty, "", r => r))
     Async.toFuture(Fetching.by(refused)(p)).map(r => assertEquals((r.status, r.body), (0, "blocked by CORS")))
 
+
+  test("an address: opened at a link's path, each place said kept in order"):
+    type App[X] = Address[X]
+    val went = scala.collection.mutable.Buffer.empty[List[String]]
+    val p = whereOpened[App].flatMap(from => nowAt[App](from :+ "who=ua").andThen(nowAt[App](Nil)).as(from))
+    assertEquals(run(addressed(List("uk", "pesel"), went)(p)), List("uk", "pesel"))
+    assertEquals(went.toList, List(List("uk", "pesel", "who=ua"), Nil))
+
+  test("a path as a URL's fragment and back; none for the empty path"):
+    assertEquals(Address.fragment(List("ru", "pesel", "who=ua")), "#/ru/pesel/who=ua")
+    assertEquals(Address.path("#/ru/pesel/who=ua"), List("ru", "pesel", "who=ua"))
+    assertEquals(Address.fragment(Nil), "")
+    assertEquals(Address.path(""), Nil)
+    assertEquals(Address.path("#//ru/"), List("ru"))

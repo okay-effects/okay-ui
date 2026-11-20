@@ -25,6 +25,25 @@ object InThePage:
             clip.writeText(t)
             true))
 
+  /** `Address` in the page's URL, its fragment (`#/ru/pesel/who=ua`, never sent to a server): opened where the URL
+   * says; each new place a new entry of the browser's history, so a link to the screen can be sent and Back goes to
+   * the screen before — with `onBack` starting the program again from there */
+  def address[R[_], Rest[_], A](p: A ! R)(using Split[okay.business.model.Address, R, Rest]): A ! Rest =
+    import okay.business.model.Address
+    handle(p, Handler.tail[Address, Rest, A, A](a => pure(a))([X] => (asked: Address[X]) => asked match
+      case Address.Opened() =>
+        Address.path(scalajs.js.URIUtils.decodeURI(dom.window.location.hash))
+      case Address.At(path) =>
+        val fragment = Address.fragment(path.map(scalajs.js.URIUtils.encodeURI))
+        if dom.window.location.hash != fragment then
+          val here = dom.window.location.pathname + dom.window.location.search
+          dom.window.history.pushState(null, "", if fragment.isEmpty then here else fragment)))
+
+  /** `again` when the person goes Back or Forward, or opens a link of this page in it: the program, run again, is
+   * opened where the URL now says (`address`) */
+  def onBack(again: () => Unit): Unit =
+    dom.window.addEventListener("popstate", (_: dom.Event) => again())
+
   /** `Settings` in the page's local storage, each name under `prefix` */
   def kept[R[_], Rest[_], A](prefix: String)(p: A ! R)(using Split[Settings, R, Rest]): A ! Rest =
     handle(p, Handler.tail[Settings, Rest, A, A](a => pure(a))([X] => (asked: Settings[X]) => asked match

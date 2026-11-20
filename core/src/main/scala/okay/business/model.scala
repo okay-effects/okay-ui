@@ -486,6 +486,22 @@ object model:
   enum Clipboard[X]:
     case Copy(text: String) extends Clipboard[Boolean]
 
+  /**
+   * WHERE THE APPLICATION IS, AS A LINK — a path: the language, a section, a topic, the answers given — so that a link
+   * sent to someone opens at the same screen. The program says where it is at each screen (`nowAt(path)`) and asks
+   * where it was opened (`whereOpened`), going straight to that screen; what an address is — a page's URL (its
+   * fragment, `#/ru/pesel/who=ua`), a test's list — is a handler's: `addressed(path, went)`, `InThePage.address`.
+   */
+  enum Address[X]:
+    case Opened() extends Address[List[String]]
+    case At(path: List[String]) extends Address[Unit]
+
+  object Address:
+    /** a path as a URL's fragment, `#/ru/pesel/who=ua`; the empty path as none */
+    def fragment(path: List[String]): String = if path.isEmpty then "" else path.mkString("#/", "/", "")
+    /** a fragment's path: its segments, empty ones dropped */
+    def path(fragment: String): List[String] = fragment.stripPrefix("#").split('/').toList.filter(_.nonEmpty)
+
   // ---- THE EFFECT AND ITS STEPS
 
   /** THE EFFECT: a screen shown, answered by the result of the button pressed */

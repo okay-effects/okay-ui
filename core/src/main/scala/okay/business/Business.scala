@@ -51,6 +51,19 @@ trait Business extends Kernel:
     handle(p, Handler.Tail[Clipboard, Rest, A, A](a => pure(a), [X] => (asked: Clipboard[X]) => asked match
       case Clipboard.Copy(t) => copied += t; true))
 
+  /** where the application was opened (`Address`): the path of a link, empty where none was given */
+  def whereOpened[R[_]](using In[Address, R]): List[String] ! R = perform[Address](Address.Opened())
+
+  /** the application is at `path` now (`Address`): the link to this screen */
+  def nowAt[R[_]](path: List[String])(using In[Address, R]): Unit ! R = perform[Address](Address.At(path))
+
+  /** THE ADDRESS AS A TEST'S: opened at `path`, every place the program says it is at kept in `went`, in order */
+  def addressed[R[_], Rest[_], A](path: List[String], went: scala.collection.mutable.Buffer[List[String]])(p: A ! R)(
+    using Split[Address, R, Rest]): A ! Rest =
+    handle(p, Handler.Tail[Address, Rest, A, A](a => pure(a), [X] => (asked: Address[X]) => asked match
+      case Address.Opened() => path
+      case Address.At(at) => went += at; ()))
+
   /** a text, read and acknowledged */
   def inform[R[_]](title: String, text: String)(using In[Ui, R]): Unit ! R =
     show(Screen[Unit](title)(Part.Text(text))(Button("OK", Style.Primary)(())))
